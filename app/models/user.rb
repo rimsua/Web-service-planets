@@ -11,7 +11,7 @@ class User < ApplicationRecord
   validates :nickname,
             presence: true,
             uniqueness: true,
-            length: { in: 5..30 }
+            length: { in: 5..10 }
 
   validates :email_address,
             presence: true,
@@ -19,7 +19,7 @@ class User < ApplicationRecord
             format: { with: URI::MailTo::EMAIL_REGEXP }
 
   validates :password,
-            length: { minimum: 6 },
+            length: { in: 6..15 },
             if: -> { password.present? }
 
   def can_create_star_system?

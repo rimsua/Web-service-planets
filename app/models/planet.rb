@@ -2,6 +2,7 @@ class Planet < ApplicationRecord
   PLANET_TYPES = %w[rocky gas ice ocean lava].freeze
   ATMOSPHERES = %w[none thin dense].freeze
   HABITABLE_TYPES = %w[rocky ocean].freeze
+  HABITABLE_TEMPERATURE = 253..313
 
   belongs_to :star_system
 
@@ -28,14 +29,14 @@ class Planet < ApplicationRecord
     HABITABLE_TYPES.include?(planet_type) &&
       atmosphere != "none" &&
       water &&
-      temperature.between?(273, 373)
+      HABITABLE_TEMPERATURE.cover?(temperature)
   end
 
   def temperature_category
     case temperature
     when 0...273
       "cold"
-    when 273..373
+    when 273..313
       "temperate"
     else
       "hot"
