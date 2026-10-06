@@ -46,11 +46,6 @@ function HomePage({ userNickname }) {
 
           </div>
 
-          <p className="hero__hint">
-            Создание звездных систем появится
-            в следующей контрольной точке.
-          </p>
-
         </div>
 
 
@@ -110,8 +105,7 @@ function HomePage({ userNickname }) {
 
           <p>
             У тебя пока нет звездных систем.
-            Создай первую систему,
-            когда функция станет доступна.
+            Создай первую систему.
           </p>
 
           <Button disabled>
