@@ -1,31 +1,46 @@
-<h1>Вход</h1>
+<div class="auth-page">
 
-<% if flash[:alert] %>
-  <p><%= flash[:alert] %></p>
-<% end %>
+  <div class="auth-card">
 
-<%= form_with url: session_path do |form| %>
-  <div>
-    <%= form.label :email_address, "Email" %>
-    <%= form.email_field :email_address,
-        required: true,
-        autofocus: true,
-        autocomplete: "email" %>
+    <div class="auth-status auth-status--logged-out">
+      <span class="auth-status__dot"></span>
+      Вы не авторизованы
+    </div>
+
+    <h1>Вход</h1>
+
+    <% if flash[:alert] %>
+      <p><%= flash[:alert] %></p>
+    <% end %>
+
+    <%= form_with url: session_path do |form| %>
+      <div>
+        <%= form.label :email_address, "Email" %>
+
+        <%= form.email_field :email_address,
+            required: true,
+            autofocus: true,
+            autocomplete: "email" %>
+      </div>
+
+      <div>
+        <%= form.label :password, "Пароль" %>
+
+        <%= form.password_field :password,
+            required: true,
+            autocomplete: "current-password" %>
+      </div>
+
+      <div>
+        <%= form.submit "Войти" %>
+      </div>
+    <% end %>
+
+    <p>
+      Нет аккаунта?
+      <%= link_to "Зарегистрироваться", sign_up_path %>
+    </p>
+
   </div>
 
-  <div>
-    <%= form.label :password, "Пароль" %>
-    <%= form.password_field :password,
-        required: true,
-        autocomplete: "current-password" %>
-  </div>
-
-  <div>
-    <%= form.submit "Войти" %>
-  </div>
-<% end %>
-
-<p>
-  Нет аккаунта?
-  <%= link_to "Зарегистрироваться", sign_up_path %>
-</p>
+</div>

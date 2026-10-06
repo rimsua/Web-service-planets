@@ -30,4 +30,18 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path
     assert_empty cookies[:session_id]
   end
+
+  test "session persists after another request" do
+    post session_path, params: {
+      email_address: @user.email_address,
+      password: "password"
+    }
+
+    assert_redirected_to root_path
+    assert cookies[:session_id]
+
+    get root_path
+
+    assert_response :success
+  end
 end
