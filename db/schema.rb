@@ -10,9 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_29_083557) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_06_021733) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "planets", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "planet_type", null: false
+    t.integer "temperature", null: false
+    t.string "atmosphere", null: false
+    t.boolean "water", default: false, null: false
+    t.bigint "star_system_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["star_system_id"], name: "index_planets_on_star_system_id"
+  end
 
   create_table "sessions", force: :cascade do |t|
     t.bigint "user_id", null: false
@@ -21,6 +33,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_083557) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
+  create_table "star_systems", force: :cascade do |t|
+    t.string "name", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_star_systems_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -33,5 +53,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_083557) do
     t.index ["nickname"], name: "index_users_on_nickname", unique: true
   end
 
+  add_foreign_key "planets", "star_systems"
   add_foreign_key "sessions", "users"
+  add_foreign_key "star_systems", "users"
 end

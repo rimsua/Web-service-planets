@@ -1,6 +1,10 @@
 class User < ApplicationRecord
+  MAX_STAR_SYSTEMS = 10
+
   has_secure_password
+
   has_many :sessions, dependent: :destroy
+  has_many :star_systems, dependent: :destroy
 
   normalizes :email_address, with: ->(email) { email.strip.downcase }
 
@@ -17,4 +21,8 @@ class User < ApplicationRecord
   validates :password,
             length: { minimum: 6 },
             if: -> { password.present? }
+
+  def can_create_star_system?
+    star_systems.count < MAX_STAR_SYSTEMS
+  end
 end
