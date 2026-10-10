@@ -1,8 +1,26 @@
+
 import AppShell from "./components/AppShell"
 import HomePage from "./pages/HomePage"
 import UiKitPage from "./pages/UiKitPage"
+import SignUpPage from "./pages/SignUpPage"
 
-function App({ page, userNickname }) {
+function App({
+  page,
+  userNickname,
+  errors = [],
+  nickname = "",
+  emailAddress = ""
+}) {
+  if (page === "sign-up") {
+    return (
+      <SignUpPage
+        errors={errors}
+        nickname={nickname}
+        emailAddress={emailAddress}
+      />
+    )
+  }
+
   let content
 
   switch (page) {

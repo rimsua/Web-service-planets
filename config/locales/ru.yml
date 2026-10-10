@@ -1,0 +1,41 @@
+ru:
+  errors:
+    format: "%{attribute} %{message}"
+    messages:
+      blank: "не может быть пустым"
+      invalid: "имеет неверный формат"
+      taken: "уже занято"
+      too_short: "слишком короткое (минимум %{count} символов)"
+      too_long: "слишком длинное (максимум %{count} символов)"
+      confirmation: "не совпадает с подтверждением"
+
+  activerecord:
+    attributes:
+      user:
+        nickname: "Никнейм"
+        email_address: "Электронная почта"
+        password: "Пароль"
+        password_confirmation: "Повтор пароля"
+
+    errors:
+      models:
+        user:
+          attributes:
+            nickname:
+              blank: "не может быть пустым"
+              taken: "уже занят"
+              too_short: "должен содержать не менее %{count} символов"
+              too_long: "должен содержать не более %{count} символов"
+
+            email_address:
+              blank: "не может быть пустой"
+              taken: "уже используется"
+              invalid: "имеет неверный формат"
+
+            password:
+              blank: "не может быть пустым"
+              too_short: "должен содержать не менее %{count} символов"
+              too_long: "должен содержать не более %{count} символов"
+
+            password_confirmation:
+              confirmation: "не совпадает с паролем"
