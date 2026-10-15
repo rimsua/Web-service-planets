@@ -44,6 +44,6 @@ class PlanetTest < ActiveSupport::TestCase
       water: false
     )
 
-    assert_equal "cold", planet.temperature_category
+    assert_equal :cold, planet.temperature_category
   end
 end

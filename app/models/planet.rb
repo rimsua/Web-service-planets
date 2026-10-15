@@ -35,11 +35,11 @@ class Planet < ApplicationRecord
   def temperature_category
     case temperature
     when 0...273
-      "cold"
+      :cold
     when 273..313
-      "temperate"
+      :temperate
     else
-      "hot"
+      :hot
     end
   end
 end
