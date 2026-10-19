@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   resource :session, only: [ :new, :create, :destroy ]
   resource :sign_up, only: [ :show, :create ]
+  resources :star_systems, only: [:create]
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   get "ui-kit", to: "ui_kit#index", as: :ui_kit

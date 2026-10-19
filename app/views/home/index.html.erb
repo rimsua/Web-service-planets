@@ -2,4 +2,9 @@
   id="react-root"
   data-page="home"
   data-user-nickname="<%= Current.user.nickname %>"
+  data-star-systems="<%= h(Current.user.star_systems.order(created_at: :desc).as_json(only: [:id, :name, :star_type]).to_json) %>"
+  data-star-system-limit="<%= User::MAX_STAR_SYSTEMS %>"
+  data-star-type-labels="<%= h(StarSystem::STAR_TYPE_LABELS.to_json) %>"
+  data-flash-alert="<%= flash[:alert] %>"
+  data-flash-notice="<%= flash[:notice] %>"
 ></div>

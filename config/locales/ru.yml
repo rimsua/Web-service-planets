@@ -8,6 +8,7 @@ ru:
       too_short: "слишком короткое (минимум %{count} символов)"
       too_long: "слишком длинное (максимум %{count} символов)"
       confirmation: "не совпадает с подтверждением"
+      inclusion: "не входит в список допустимых значений"
 
   activerecord:
     attributes:
@@ -16,6 +17,9 @@ ru:
         email_address: "Электронная почта"
         password: "Пароль"
         password_confirmation: "Повтор пароля"
+      star_system:
+        name: "Название системы"
+        star_type: "Тип звезды"
 
     errors:
       models:

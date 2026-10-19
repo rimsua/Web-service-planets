@@ -9,7 +9,12 @@ function App({
   userNickname,
   errors = [],
   nickname = "",
-  emailAddress = ""
+  emailAddress = "",
+  starSystems = [],
+  starSystemLimit = 10,
+  starTypeLabels = {},
+  flashAlert = "",
+  flashNotice = ""
 }) {
   if (page === "sign-up") {
     return (
@@ -30,7 +35,16 @@ function App({
 
     case "home":
     default:
-      content = <HomePage userNickname={userNickname} />
+      content = (
+        <HomePage
+          userNickname={userNickname}
+          starSystems={starSystems}
+          starSystemLimit={starSystemLimit}
+          starTypeLabels={starTypeLabels}
+          flashAlert={flashAlert}
+          flashNotice={flashNotice}
+        />
+      )
       break
   }
 

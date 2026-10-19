@@ -10,9 +10,27 @@ const rootElement = document.getElementById("react-root")
 if (rootElement) {
   const page = rootElement.dataset.page
   const userNickname = rootElement.dataset.userNickname
+
+  // Данные формы регистрации
   const errors = JSON.parse(rootElement.dataset.errors || "[]")
   const nickname = rootElement.dataset.nickname || ""
   const emailAddress = rootElement.dataset.emailAddress || ""
+
+  // Данные звёздных систем для главной страницы
+  const starSystems = JSON.parse(
+    rootElement.dataset.starSystems || "[]"
+  )
+
+  const starSystemLimit = Number(
+    rootElement.dataset.starSystemLimit || 10
+  )
+
+  const starTypeLabels = JSON.parse(
+    rootElement.dataset.starTypeLabels || "{}"
+  )
+
+  const flashAlert = rootElement.dataset.flashAlert || ""
+  const flashNotice = rootElement.dataset.flashNotice || ""
 
   createRoot(rootElement).render(
     <React.StrictMode>
@@ -22,6 +40,11 @@ if (rootElement) {
         errors={errors}
         nickname={nickname}
         emailAddress={emailAddress}
+        starSystems={starSystems}
+        starSystemLimit={starSystemLimit}
+        starTypeLabels={starTypeLabels}
+        flashAlert={flashAlert}
+        flashNotice={flashNotice}
       />
     </React.StrictMode>
   )

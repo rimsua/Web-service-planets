@@ -11,6 +11,23 @@ class StarSystemTest < ActiveSupport::TestCase
     @system = @user.star_systems.create!(name: "Solar")
   end
 
+  test "star type defaults to G" do
+    assert_equal "G", @system.star_type
+  end
+
+  test "accepts a valid star type" do
+    @system.star_type = "M"
+
+    assert @system.valid?
+  end
+
+  test "rejects an unknown star type" do
+    @system.star_type = "purple"
+
+    assert_not @system.valid?
+    assert_includes @system.errors.attribute_names, :star_type
+  end
+
   test "has a user" do
     assert_equal @user, @system.user
   end

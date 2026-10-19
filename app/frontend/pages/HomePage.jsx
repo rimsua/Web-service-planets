@@ -1,8 +1,17 @@
-import Button from "../components/ui/Button"
 import Badge from "../components/ui/Badge"
 import Card from "../components/ui/Card"
 
-function HomePage({ userNickname }) {
+function HomePage({
+  userNickname,
+  starSystems = [],
+  starSystemLimit = 10,
+  starTypeLabels = {},
+  flashAlert = "",
+  flashNotice = ""
+}) {
+  const csrfToken =
+  document.querySelector('meta[name="csrf-token"]')?.content || ""
+
   return (
     <div className="page">
 
@@ -33,9 +42,9 @@ function HomePage({ userNickname }) {
 
           <div className="hero__actions">
 
-            <Button disabled>
-              ✦ Создать звездную систему
-            </Button>
+            <a href="#create-star-system" className="btn btn--primary">
+              ✦ Создать звёздную систему
+            </a>
 
             <a
               href="/ui-kit"
@@ -73,47 +82,125 @@ function HomePage({ userNickname }) {
 
 
       <section className="section">
-
         <div className="section__header">
-
           <div>
-            <p className="eyebrow">
-              YOUR UNIVERSE
-            </p>
-
-            <h2>
-              Мои звездные системы
-            </h2>
+            <p className="eyebrow">YOUR UNIVERSE</p>
+            <h2>Мои звёздные системы</h2>
           </div>
 
           <Badge>
-            0 / 10
+            {starSystems.length} / {starSystemLimit}
           </Badge>
-
         </div>
 
+        {flashAlert && (
+          <div className="auth-errors" role="alert">
+            <p>{flashAlert}</p>
+          </div>
+        )}
 
-        <div className="empty-state">
+        {flashNotice && (
+          <div className="system-notice" role="status">
+            {flashNotice}
+          </div>
+        )}
 
-          <div className="empty-state__icon">
-            ✦
+        <div className="system-workspace">
+          <div className="system-create-panel" id="create-star-system">
+            <p className="eyebrow">NEW SYSTEM</p>
+            <h3>Создать звёздную систему</h3>
+
+            {starSystems.length >= starSystemLimit ? (
+              <p className="text-muted">
+                Ты достигла лимита в {starSystemLimit} систем.
+              </p>
+            ) : (
+              <form
+                action="/star_systems"
+                method="post"
+                className="system-create-form"
+              >
+                <input
+                  type="hidden"
+                  name="authenticity_token"
+                  value={csrfToken}
+                />
+
+                <div className="system-form__field">
+                  <label htmlFor="star_system_name">
+                    Название системы
+                  </label>
+
+                  <input
+                    id="star_system_name"
+                    name="star_system[name]"
+                    type="text"
+                    maxLength={20}
+                    required
+                  />
+                </div>
+
+                <div className="system-form__field">
+                  <label htmlFor="star_system_star_type">
+                    Тип звезды
+                  </label>
+
+                  <select
+                    id="star_system_star_type"
+                    name="star_system[star_type]"
+                    defaultValue="G"
+                    required
+                  >
+                    {Object.entries(starTypeLabels).map(([type, label]) => (
+                      <option key={type} value={type}>
+                        {type} — {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <button type="submit" className="btn btn--primary">
+                  Создать систему
+                </button>
+              </form>
+            )}
           </div>
 
-          <h3>
-            Здесь пока пусто
-          </h3>
+          <div className="system-list">
+            {starSystems.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-state__icon">✦</div>
+                <h3>Здесь пока пусто</h3>
+                <p>
+                  Создай первую звёздную систему и выбери для неё звезду.
+                </p>
+              </div>
+            ) : (
+              <div className="system-grid">
+                {starSystems.map((system) => (
+                  <article className="ui-card system-card" key={system.id}>
+                    <div
+                      className={`star-preview star-preview--${system.star_type.toLowerCase()}`}
+                      aria-hidden="true"
+                    >
+                      {system.star_type}
+                    </div>
 
-          <p>
-            У тебя пока нет звездных систем.
-            Создай первую систему.
-          </p>
+                    <p className="eyebrow">
+                      SPECTRAL CLASS {system.star_type}
+                    </p>
 
-          <Button disabled>
-            Создать первую систему
-          </Button>
+                    <h3>{system.name}</h3>
 
+                    <p>
+                      {starTypeLabels[system.star_type]}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-
       </section>
 
 
