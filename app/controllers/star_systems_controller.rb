@@ -1,4 +1,9 @@
 class StarSystemsController < ApplicationController
+  def show
+    @star_system = Current.user.star_systems
+                            .includes(:planets)
+                            .find(params[:id])
+  end
   def create
     unless Current.user.can_create_star_system?
       redirect_to root_path,

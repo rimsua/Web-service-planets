@@ -178,24 +178,36 @@ function HomePage({
             ) : (
               <div className="system-grid">
                 {starSystems.map((system) => (
-                  <article className="ui-card system-card" key={system.id}>
-                    <div
-                      className={`star-preview star-preview--${system.star_type.toLowerCase()}`}
-                      aria-hidden="true"
-                    >
-                      {system.star_type}
-                    </div>
+                  <a
+                    href={`/star_systems/${system.id}`}
+                    className="system-card-link"
+                    key={system.id}
+                    aria-label={`Открыть звёздную систему ${system.name}`}
+                  >
+                    <article className="ui-card system-card">
+                      <div
+                        className={`star-preview star-preview--${system.star_type.toLowerCase()}`}
+                        aria-hidden="true"
+                      >
+                        {system.star_type}
+                      </div>
 
-                    <p className="eyebrow">
-                      SPECTRAL CLASS {system.star_type}
-                    </p>
+                      <p className="eyebrow">
+                        SPECTRAL CLASS {system.star_type}
+                      </p>
 
-                    <h3>{system.name}</h3>
+                      <h3>{system.name}</h3>
 
-                    <p>
-                      {starTypeLabels[system.star_type]}
-                    </p>
-                  </article>
+                      <p>
+                        {starTypeLabels[system.star_type] ||
+                          `Спектральный класс ${system.star_type}`}
+                      </p>
+
+                      <span className="system-card-link__hint">
+                        Открыть систему →
+                      </span>
+                    </article>
+                  </a>
                 ))}
               </div>
             )}

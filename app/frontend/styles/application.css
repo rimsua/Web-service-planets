@@ -1901,3 +1901,234 @@ h2 {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ========================
+   STAR SYSTEM DETAILS
+   ======================== */
+
+.system-card-link {
+  display: block;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.system-card-link .system-card {
+  height: 100%;
+}
+
+.system-card-link:hover .system-card {
+  border-color: var(--cyan);
+}
+
+.system-card-link:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+  border-radius: var(--radius-md);
+}
+
+.system-card-link__hint {
+  display: inline-block;
+  margin-top: 18px;
+  color: var(--cyan);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.system-detail-page {
+  gap: 26px;
+}
+
+.system-back-link {
+  align-self: flex-start;
+  color: var(--text-soft);
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.system-back-link:hover {
+  color: var(--cyan);
+}
+
+.system-detail-hero {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  padding: clamp(24px, 5vw, 48px);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  background:
+    radial-gradient(
+      circle at 12% 50%,
+      rgba(102, 227, 255, 0.1),
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(18, 25, 47, 0.98),
+      rgba(10, 14, 29, 0.98)
+    );
+
+  box-shadow: var(--shadow);
+}
+
+.system-detail-star {
+  flex: 0 0 100px;
+  width: 100px;
+  height: 100px;
+  margin: 0;
+  font-size: 22px;
+}
+
+.system-detail-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.system-detail-info h1 {
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.1;
+}
+
+.system-detail-type {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.system-detail-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 92px;
+  padding: 18px 14px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.system-detail-count__number {
+  color: var(--cyan);
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.system-detail-count__label {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 650px) {
+  .system-detail-hero {
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .system-detail-star {
+    flex-basis: 72px;
+    width: 72px;
+    height: 72px;
+  }
+
+  .system-detail-info {
+    flex-basis: calc(100% - 100px);
+  }
+
+  .system-detail-count {
+    flex-direction: row;
+    justify-content: flex-start;
+    width: 100%;
+  }
+}
+
+/* ========================
+   PLANET LIST AND FORM
+   ======================== */
+
+.planet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.planet-card {
+  min-width: 0;
+}
+
+.planet-card h3 {
+  margin-bottom: 12px;
+  overflow-wrap: anywhere;
+}
+
+.planet-marker {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+  border-radius: 50%;
+  font-size: 24px;
+  color: #080b17;
+  background: var(--cyan);
+  box-shadow: 0 0 28px rgba(102, 227, 255, 0.22);
+}
+
+.planet-marker--gas {
+  background: #c3a6ff;
+  box-shadow: 0 0 28px rgba(156, 124, 255, 0.25);
+}
+
+.planet-marker--ice {
+  background: #b8e6ff;
+}
+
+.planet-marker--ocean {
+  background: #66e3ff;
+}
+
+.planet-marker--lava {
+  background: #ff9470;
+  box-shadow: 0 0 28px rgba(255, 117, 95, 0.25);
+}
+
+.planet-properties {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0 0;
+}
+
+.planet-properties > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.planet-properties dt {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.planet-properties dd {
+  margin: 0;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .planet-grid {
+    grid-template-columns: 1fr;
+  }
+}

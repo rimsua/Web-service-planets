@@ -29,6 +29,14 @@ if (rootElement) {
     rootElement.dataset.starTypeLabels || "{}"
   )
 
+  const starSystem = JSON.parse(
+    rootElement.dataset.starSystem || "null"
+  )
+  
+  const planets = JSON.parse(
+    rootElement.dataset.planets || "[]"
+  )
+
   const flashAlert = rootElement.dataset.flashAlert || ""
   const flashNotice = rootElement.dataset.flashNotice || ""
 
@@ -43,6 +51,8 @@ if (rootElement) {
         starSystems={starSystems}
         starSystemLimit={starSystemLimit}
         starTypeLabels={starTypeLabels}
+        starSystem={starSystem}
+        planets={planets}
         flashAlert={flashAlert}
         flashNotice={flashNotice}
       />
