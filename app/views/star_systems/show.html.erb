@@ -4,7 +4,7 @@
   data-user-nickname="<%= Current.user.nickname %>"
   data-star-system="<%= h(@star_system.as_json(only: [:id, :name, :star_type]).merge(planet_count: @star_system.planet_count).to_json) %>"
   data-star-type-labels="<%= h(StarSystem::STAR_TYPE_LABELS.to_json) %>"
-  data-planets="<%= h(@star_system.planets.as_json(only: [:id, :name, :planet_type, :temperature, :atmosphere, :water]).to_json) %>"
+  data-planets="<%= h(@star_system.planets.map { |planet| planet.as_json(only: [:id, :name, :planet_type, :temperature, :atmosphere, :water]).merge(habitable: planet.habitable?) }.to_json) %>"
   data-flash-alert="<%= h(flash[:alert].to_s) %>"
   data-flash-notice="<%= h(flash[:notice].to_s) %>"
 ></div>

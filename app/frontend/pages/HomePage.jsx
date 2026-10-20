@@ -203,6 +203,10 @@ function HomePage({
                           `Спектральный класс ${system.star_type}`}
                       </p>
 
+                      <p className="system-card-planet-count">
+                        Планет: {system.planet_count ?? 0}
+                      </p>
+
                       <span className="system-card-link__hint">
                         Открыть систему →
                       </span>

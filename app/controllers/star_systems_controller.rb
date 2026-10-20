@@ -5,6 +5,18 @@ class StarSystemsController < ApplicationController
                             .find(params[:id])
   end
 
+  def update
+    @star_system = Current.user.star_systems.find(params[:id])
+
+    if @star_system.update(params.require(:star_system).permit(:name))
+      redirect_to star_system_path(@star_system),
+                  notice: "Название звёздной системы изменено."
+    else
+      redirect_to star_system_path(@star_system),
+                  alert: @star_system.errors.full_messages.to_sentence
+    end
+  end
+
   def destroy
     @star_system = Current.user.star_systems.find(params[:id])
     @star_system.destroy
@@ -12,7 +24,7 @@ class StarSystemsController < ApplicationController
     redirect_to root_path,
                 notice: "Звёздная система удалена вместе со всеми её планетами."
   end
-  
+
   def create
     unless Current.user.can_create_star_system?
       redirect_to root_path,

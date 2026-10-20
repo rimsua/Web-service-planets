@@ -20,8 +20,10 @@ class PlanetsController < ApplicationController
       params[:star_system_id]
     )
 
+    custom_name = params.dig(:planet, :name).to_s.strip
+
     @planet = @star_system.planets.new(
-      name: "Planet-#{rand(100000..999999)}",
+      name: custom_name.presence || "Planet-#{rand(100000..999999)}",
       planet_type: Planet::PLANET_TYPES.sample,
       temperature: rand(50..1000),
       atmosphere: Planet::ATMOSPHERES.sample,
@@ -34,6 +36,19 @@ class PlanetsController < ApplicationController
     else
       redirect_to star_system_path(@star_system),
                   alert: @planet.errors.full_messages.join(". ")
+    end
+  end
+
+  def update
+    @star_system = Current.user.star_systems.find(params[:star_system_id])
+    @planet = @star_system.planets.find(params[:id])
+
+    if @planet.update(params.require(:planet).permit(:name))
+      redirect_to star_system_path(@star_system),
+                  notice: "Название планеты изменено."
+    else
+      redirect_to star_system_path(@star_system),
+                  alert: @planet.errors.full_messages.to_sentence
     end
   end
 

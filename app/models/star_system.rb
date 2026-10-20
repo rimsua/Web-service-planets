@@ -2,7 +2,7 @@ class StarSystem < ApplicationRecord
   # Допустимые спектральные классы звёзд.
   STAR_TYPES = %w[O B A F G K M].freeze
 
-  # названия класса звезды для интерфейса
+  # Названия класса звезды для интерфейса.
   STAR_TYPE_LABELS = {
     "O" => "Голубая, очень горячая",
     "B" => "Голубовато-белая",
@@ -16,10 +16,25 @@ class StarSystem < ApplicationRecord
   belongs_to :user
   has_many :planets, dependent: :destroy
 
+  # Убираем пробелы в начале и конце названия.
+  before_validation do
+    self.name = name.strip if name.is_a?(String)
+  end
+
+  # Проверяем наличие названия и его длину.
   validates :name,
             presence: true,
             length: { in: 1..20 }
 
+  # Запрещаем одинаковые названия систем у одного пользователя.
+  validates :name,
+            uniqueness: {
+              scope: :user_id,
+              case_sensitive: false,
+              message: "уже используется другой звёздной системой"
+            }
+
+  # Проверяем допустимость спектрального класса звезды.
   validates :star_type,
             inclusion: { in: STAR_TYPES }
 
