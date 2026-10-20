@@ -24,7 +24,7 @@ class StarSystem < ApplicationRecord
   # Проверяем наличие названия и его длину.
   validates :name,
             presence: true,
-            length: { in: 1..20 }
+            length: { in: 1..15 }
 
   # Запрещаем одинаковые названия систем у одного пользователя.
   validates :name,

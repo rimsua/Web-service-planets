@@ -6,9 +6,20 @@ class Planet < ApplicationRecord
 
   belongs_to :star_system
 
+  before_validation do
+    self.name = name.strip if name.is_a?(String)
+  end
+
   validates :name,
             presence: true,
-            length: { in: 1..50 }
+            length: { in: 1..15 }
+  
+  validates :name,
+          uniqueness: {
+            scope: :star_system_id,
+            case_sensitive: false,
+            message: "уже используется другой планетой в этой системе"
+          }
 
   validates :planet_type,
             inclusion: { in: PLANET_TYPES }
