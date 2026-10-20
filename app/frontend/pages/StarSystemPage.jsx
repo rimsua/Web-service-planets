@@ -41,9 +41,44 @@ function StarSystemPage({
 
   return (
     <div className="page system-detail-page">
-      <a href="/" className="system-back-link">
-        ← Все звёздные системы
-      </a>
+      <div className="system-page-actions">
+        <a href="/" className="system-back-link">
+          ← Все звёздные системы
+        </a>
+
+        <form
+          action={`/star_systems/${starSystem.id}`}
+          method="post"
+          onSubmit={(event) => {
+            const confirmed = window.confirm(
+              `Удалить систему «${starSystem.name}» вместе со всеми её планетами?`
+            )
+
+            if (!confirmed) {
+              event.preventDefault()
+            }
+          }}
+        >
+          <input
+            type="hidden"
+            name="authenticity_token"
+            value={csrfToken}
+          />
+
+          <input
+            type="hidden"
+            name="_method"
+            value="delete"
+          />
+
+          <button
+            type="submit"
+            className="btn btn--danger btn--small"
+          >
+            Удалить систему
+          </button>
+        </form>
+      </div>
 
       <section className="system-detail-hero">
         <div
@@ -142,6 +177,40 @@ function StarSystemPage({
                     <dd>{planet.water ? "Есть" : "Нет"}</dd>
                   </div>
                 </dl>
+
+                <form
+                  action={`/star_systems/${starSystem.id}/planets/${planet.id}`}
+                  method="post"
+                  className="planet-delete-form"
+                  onSubmit={(event) => {
+                    const confirmed = window.confirm(
+                      `Удалить планету «${planet.name}»?`
+                    )
+
+                    if (!confirmed) {
+                      event.preventDefault()
+                    }
+                  }}
+                >
+                  <input
+                    type="hidden"
+                    name="authenticity_token"
+                    value={csrfToken}
+                  />
+
+                  <input
+                    type="hidden"
+                    name="_method"
+                    value="delete"
+                  />
+
+                  <button
+                    type="submit"
+                    className="btn btn--danger btn--small"
+                  >
+                    Удалить планету
+                  </button>
+                </form>
               </article>
             ))}
           </div>
@@ -241,6 +310,31 @@ function StarSystemPage({
               Добавить планету
             </button>
           </form>
+
+          <div className="planet-random-actions">
+            <p className="planet-random-actions__description">
+              Не хочешь задавать параметры вручную? Создай планету случайным образом.
+            </p>
+
+            <form
+              action={`/star_systems/${starSystem.id}/planets/generate_random`}
+              method="post"
+              className="planet-random-form"
+            >
+              <input
+                type="hidden"
+                name="authenticity_token"
+                value={csrfToken}
+              />
+
+              <button
+                type="submit"
+                className="btn btn--secondary"
+              >
+                ✦ Сгенерировать случайную планету
+              </button>
+            </form>
+          </div>
         </div>
       </section>
     </div>

@@ -1,8 +1,12 @@
 Rails.application.routes.draw do
   resource :session, only: [ :new, :create, :destroy ]
   resource :sign_up, only: [ :show, :create ]
-  resources :star_systems, only: [ :create, :show ] do
-    resources :planets, only: [ :create ]
+  resources :star_systems, only: [:create, :show, :destroy] do
+    resources :planets, only: [:create, :destroy] do
+      collection do
+        post :generate_random
+      end
+    end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

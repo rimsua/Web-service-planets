@@ -2132,3 +2132,56 @@ h2 {
     grid-template-columns: 1fr;
   }
 }
+
+/* Случайная генерация планеты */
+
+.planet-random-actions {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.planet-random-actions__description {
+  margin-bottom: 14px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.planet-random-form .btn {
+  width: 100%;
+}
+
+/* Действия на странице звёздной системы */
+
+.system-page-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.system-page-actions form,
+.planet-delete-form {
+  margin: 0;
+}
+
+.planet-delete-form {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* Кнопки удаления */
+
+.btn--danger {
+  color: var(--danger);
+  border-color: rgba(255, 117, 143, 0.3);
+  background: rgba(255, 117, 143, 0.08);
+}
+
+.btn--danger:hover:not(:disabled) {
+  border-color: var(--danger);
+  background: rgba(255, 117, 143, 0.16);
+}

@@ -4,6 +4,15 @@ class StarSystemsController < ApplicationController
                             .includes(:planets)
                             .find(params[:id])
   end
+
+  def destroy
+    @star_system = Current.user.star_systems.find(params[:id])
+    @star_system.destroy
+
+    redirect_to root_path,
+                notice: "Звёздная система удалена вместе со всеми её планетами."
+  end
+  
   def create
     unless Current.user.can_create_star_system?
       redirect_to root_path,
