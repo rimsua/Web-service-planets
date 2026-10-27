@@ -12,7 +12,7 @@ class Planet < ApplicationRecord
 
   validates :name,
             presence: true,
-            length: { in: 1..15 }
+            length: { in: 1..50 }
   
   validates :name,
           uniqueness: {
