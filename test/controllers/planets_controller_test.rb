@@ -100,6 +100,75 @@ class PlanetsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "New Earth", planet.reload.name
   end
 
+  test "updates all planet properties" do
+    planet = create_test_planet("Mars")
+
+    patch star_system_planet_path(@system, planet),
+          params: {
+            planet: {
+              name: "OceanicPlanet",
+              planet_type: "ocean",
+              temperature: 300,
+              atmosphere: "thin",
+              water: "true"
+            }
+          }
+
+    assert_redirected_to star_system_path(@system)
+
+    planet.reload
+
+    assert_equal "OceanicPlanet", planet.name
+    assert_equal "ocean", planet.planet_type
+    assert_equal 300, planet.temperature
+    assert_equal "thin", planet.atmosphere
+    assert_equal true, planet.water
+  end
+
+  test "accepts a planet name with 25 characters" do
+    name = "PlanetName123456789012345"
+
+    assert_equal 25, name.length
+
+    assert_difference("Planet.count", 1) do
+      post star_system_planets_path(@system),
+          params: {
+            planet: {
+              name: name,
+              planet_type: "rocky",
+              temperature: 288,
+              atmosphere: "dense",
+              water: true
+            }
+          }
+    end
+
+    assert_redirected_to star_system_path(@system)
+    assert @system.planets.exists?(name: name)
+  end
+
+  test "rejects a planet name longer than 25 characters" do
+    name = "PlanetName1234567890123456"
+
+    assert_equal 26, name.length
+
+    assert_no_difference("Planet.count") do
+      post star_system_planets_path(@system),
+          params: {
+            planet: {
+              name: name,
+              planet_type: "rocky",
+              temperature: 288,
+              atmosphere: "dense",
+              water: true
+            }
+          }
+    end
+
+    assert_redirected_to star_system_path(@system)
+    assert_not_nil flash[:alert]
+  end
+
   test "does not rename a planet to a duplicate name" do
     create_test_planet("Earth")
     mars = create_test_planet("Mars")

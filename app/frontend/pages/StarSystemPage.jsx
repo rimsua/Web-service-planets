@@ -13,23 +13,53 @@ function StarSystemPage({
   const [pendingDeletion, setPendingDeletion] = useState(null)
 
   const [isEditingSystemName, setIsEditingSystemName] = useState(false)
-const [systemNameDraft, setSystemNameDraft] = useState(starSystem?.name || "")
+  const [systemNameDraft, setSystemNameDraft] = useState(
+    starSystem?.name || ""
+  )
 
-const [editingPlanetId, setEditingPlanetId] = useState(null)
-const [planetNameDraft, setPlanetNameDraft] = useState("")
+  const [editingPlanetId, setEditingPlanetId] = useState(null)
+
+  const [planetDraft, setPlanetDraft] = useState({
+    name: "",
+    planet_type: "rocky",
+    temperature: 288,
+    atmosphere: "dense",
+    water: false
+  })
+
+  const startEditingPlanet = (planet) => {
+    setPlanetDraft({
+      name: planet.name,
+      planet_type: planet.planet_type,
+      temperature: planet.temperature,
+      atmosphere: planet.atmosphere,
+      water: Boolean(planet.water)
+    })
+
+    setEditingPlanetId(planet.id)
+  }
+
+  const updatePlanetDraft = (field, value) => {
+    setPlanetDraft((current) => ({
+      ...current,
+      [field]: value
+    }))
+  }
 
   if (!starSystem) {
     return (
       <div className="page system-detail-page">
         <p>Звёздная система не найдена.</p>
-        <a href="/" className="btn btn--secondary">
-          Вернуться на главную
+
+        <a href="/star_systems" className="btn btn--secondary">
+          Вернуться к звёздным системам
         </a>
       </div>
     )
   }
 
   const starType = starSystem.star_type || "G"
+
   const starLabel =
     starTypeLabels[starType] || `Спектральный класс ${starType}`
 
@@ -110,7 +140,12 @@ const [planetNameDraft, setPlanetNameDraft] = useState("")
                 action={`/star_systems/${starSystem.id}`}
                 method="post"
               >
-                <input type="hidden" name="authenticity_token" value={csrfToken} />
+                <input
+                  type="hidden"
+                  name="authenticity_token"
+                  value={csrfToken}
+                />
+
                 <input type="hidden" name="_method" value="patch" />
 
                 <input
@@ -118,14 +153,21 @@ const [planetNameDraft, setPlanetNameDraft] = useState("")
                   type="text"
                   name="star_system[name]"
                   value={systemNameDraft}
-                  onChange={(event) => setSystemNameDraft(event.target.value)}
+                  onChange={(event) =>
+                    setSystemNameDraft(event.target.value)
+                  }
                   maxLength={20}
                   required
                   autoFocus
                   aria-label="Новое название звёздной системы"
                 />
 
-                <button className="btn btn--primary btn--small" type="submit">Сохранить</button>
+                <button
+                  className="btn btn--primary btn--small"
+                  type="submit"
+                >
+                  Сохранить
+                </button>
 
                 <button
                   className="btn btn--secondary btn--small"
@@ -212,93 +254,214 @@ const [planetNameDraft, setPlanetNameDraft] = useState("")
         ) : (
           <div className="planet-grid">
             {planets.map((planet) => (
-              <article className="ui-card planet-card" key={planet.id}>
-                <div className={`planet-marker planet-marker--${planet.planet_type}`}>
+              <article
+                className="ui-card planet-card"
+                key={planet.id}
+              >
+                <div
+                  className={`planet-marker planet-marker--${planet.planet_type}`}
+                >
                   ✦
                 </div>
 
                 {editingPlanetId === planet.id ? (
                   <form
-                    className="inline-rename-form"
+                    className="system-create-form planet-edit-form"
                     action={`/star_systems/${starSystem.id}/planets/${planet.id}`}
                     method="post"
                   >
-                    <input type="hidden" name="authenticity_token" value={csrfToken} />
-                    <input type="hidden" name="_method" value="patch" />
-
                     <input
-                      className="form__input"
-                      type="text"
-                      name="planet[name]"
-                      value={planetNameDraft}
-                      onChange={(event) => setPlanetNameDraft(event.target.value)}
-                      maxLength={50}
-                      required
-                      autoFocus
-                      aria-label="Новое название планеты"
+                      type="hidden"
+                      name="authenticity_token"
+                      value={csrfToken}
                     />
 
-                    <button className="btn btn--primary btn--small" type="submit">Сохранить</button>
+                    <input
+                      type="hidden"
+                      name="_method"
+                      value="patch"
+                    />
+
+                    <div className="system-form__field">
+                      <label htmlFor={`planet_name_${planet.id}`}>
+                        Название
+                      </label>
+
+                      <input
+                        id={`planet_name_${planet.id}`}
+                        className="form__input"
+                        name="planet[name]"
+                        type="text"
+                        value={planetDraft.name}
+                        onChange={(event) =>
+                          updatePlanetDraft("name", event.target.value)
+                        }
+                        maxLength={25}
+                        required
+                      />
+                    </div>
+
+                    <div className="system-form__field">
+                      <label htmlFor={`planet_type_${planet.id}`}>
+                        Тип планеты
+                      </label>
+
+                      <select
+                        id={`planet_type_${planet.id}`}
+                        name="planet[planet_type]"
+                        value={planetDraft.planet_type}
+                        onChange={(event) =>
+                          updatePlanetDraft(
+                            "planet_type",
+                            event.target.value
+                          )
+                        }
+                        required
+                      >
+                        <option value="rocky">Каменистая</option>
+                        <option value="gas">Газовая</option>
+                        <option value="ice">Ледяная</option>
+                        <option value="ocean">Океаническая</option>
+                        <option value="lava">Лавовая</option>
+                      </select>
+                    </div>
+
+                    <div className="system-form__field">
+                      <label htmlFor={`planet_temperature_${planet.id}`}>
+                        Температура (Кельвины)
+                      </label>
+
+                      <input
+                        id={`planet_temperature_${planet.id}`}
+                        className="form__input"
+                        name="planet[temperature]"
+                        type="number"
+                        min={0}
+                        step={1}
+                        value={planetDraft.temperature}
+                        onChange={(event) =>
+                          updatePlanetDraft(
+                            "temperature",
+                            event.target.value
+                          )
+                        }
+                        required
+                      />
+                    </div>
+
+                    <div className="system-form__field">
+                      <label htmlFor={`planet_atmosphere_${planet.id}`}>
+                        Атмосфера
+                      </label>
+
+                      <select
+                        id={`planet_atmosphere_${planet.id}`}
+                        name="planet[atmosphere]"
+                        value={planetDraft.atmosphere}
+                        onChange={(event) =>
+                          updatePlanetDraft(
+                            "atmosphere",
+                            event.target.value
+                          )
+                        }
+                        required
+                      >
+                        <option value="none">Нет</option>
+                        <option value="thin">Разреженная</option>
+                        <option value="dense">Плотная</option>
+                      </select>
+                    </div>
+
+                    <div className="system-form__field">
+                      <label htmlFor={`planet_water_${planet.id}`}>
+                        Наличие воды
+                      </label>
+
+                      <select
+                        id={`planet_water_${planet.id}`}
+                        name="planet[water]"
+                        value={planetDraft.water ? "true" : "false"}
+                        onChange={(event) =>
+                          updatePlanetDraft(
+                            "water",
+                            event.target.value === "true"
+                          )
+                        }
+                        required
+                      >
+                        <option value="false">Нет</option>
+                        <option value="true">Есть</option>
+                      </select>
+                    </div>
 
                     <button
-                      className="btn btn--secondary btn--small"
+                      type="submit"
+                      className="btn btn--primary"
+                    >
+                      Сохранить изменения
+                    </button>
+
+                    <button
                       type="button"
-                      onClick={() => {
-                        setPlanetNameDraft("")
-                        setEditingPlanetId(null)
-                      }}
+                      className="btn btn--secondary"
+                      onClick={() => setEditingPlanetId(null)}
                     >
                       Отмена
                     </button>
                   </form>
                 ) : (
-                  <div className="entity-title-row">
-                    <h3>{planet.name}</h3>
+                  <>
+                    <div className="entity-title-row">
+                      <h3>{planet.name}</h3>
 
-                    <button
-                      className="btn btn--secondary btn--small"
-                      type="button"
-                      onClick={() => {
-                        setPlanetNameDraft(planet.name)
-                        setEditingPlanetId(planet.id)
-                      }}
-                      aria-label={`Изменить название планеты ${planet.name}`}
+                      <button
+                        className="btn btn--secondary btn--small"
+                        type="button"
+                        onClick={() => startEditingPlanet(planet)}
+                        aria-label={`Редактировать планету ${planet.name}`}
+                      >
+                        Редактировать
+                      </button>
+                    </div>
+
+                    <span className="badge badge--muted">
+                      {planetTypeLabels[planet.planet_type] ||
+                        planet.planet_type}
+                    </span>
+
+                    <span
+                      className={`badge ${
+                        planet.habitable
+                          ? "badge--success"
+                          : "badge--danger"
+                      } planet-habitability`}
                     >
-                      Изменить имя
-                    </button>
-                  </div>
+                      {planet.habitable
+                        ? "Потенциально пригодна по модели"
+                        : "Не проходит критерии модели"}
+                    </span>
+
+                    <dl className="planet-properties">
+                      <div>
+                        <dt>Температура</dt>
+                        <dd>{planet.temperature} K</dd>
+                      </div>
+
+                      <div>
+                        <dt>Атмосфера</dt>
+                        <dd>
+                          {atmosphereLabels[planet.atmosphere] ||
+                            planet.atmosphere}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>Вода</dt>
+                        <dd>{planet.water ? "Есть" : "Нет"}</dd>
+                      </div>
+                    </dl>
+                  </>
                 )}
-
-                <span className="badge badge--muted">
-                  {planetTypeLabels[planet.planet_type] || planet.planet_type}
-                </span>
-
-                <span
-                  className={`badge ${
-                    planet.habitable ? "badge--success" : "badge--danger"
-                  } planet-habitability`}
-                >
-                  {planet.habitable
-                    ? "Потенциально пригодна по модели"
-                    : "Не проходит критерии модели"}
-                </span>
-
-                <dl className="planet-properties">
-                  <div>
-                    <dt>Температура</dt>
-                    <dd>{planet.temperature} K</dd>
-                  </div>
-
-                  <div>
-                    <dt>Атмосфера</dt>
-                    <dd>{atmosphereLabels[planet.atmosphere] || planet.atmosphere}</dd>
-                  </div>
-
-                  <div>
-                    <dt>Вода</dt>
-                    <dd>{planet.water ? "Есть" : "Нет"}</dd>
-                  </div>
-                </dl>
 
                 <form
                   action={`/star_systems/${starSystem.id}/planets/${planet.id}`}
@@ -361,17 +524,19 @@ const [planetNameDraft, setPlanetNameDraft] = useState("")
 
             <div className="system-form__field">
               <label htmlFor="planet_name">Название</label>
+
               <input
                 id="planet_name"
                 name="planet[name]"
                 type="text"
-                maxLength={50}
+                maxLength={25}
                 required
               />
             </div>
 
             <div className="system-form__field">
               <label htmlFor="planet_type">Тип планеты</label>
+
               <select
                 id="planet_type"
                 name="planet[planet_type]"
@@ -390,6 +555,7 @@ const [planetNameDraft, setPlanetNameDraft] = useState("")
               <label htmlFor="planet_temperature">
                 Температура (Кельвины)
               </label>
+
               <input
                 id="planet_temperature"
                 name="planet[temperature]"
@@ -403,6 +569,7 @@ const [planetNameDraft, setPlanetNameDraft] = useState("")
 
             <div className="system-form__field">
               <label htmlFor="planet_atmosphere">Атмосфера</label>
+
               <select
                 id="planet_atmosphere"
                 name="planet[atmosphere]"
@@ -417,6 +584,7 @@ const [planetNameDraft, setPlanetNameDraft] = useState("")
 
             <div className="system-form__field">
               <label htmlFor="planet_water">Наличие воды</label>
+
               <select
                 id="planet_water"
                 name="planet[water]"
@@ -428,7 +596,10 @@ const [planetNameDraft, setPlanetNameDraft] = useState("")
               </select>
             </div>
 
-            <button type="submit" className="btn btn--primary">
+            <button
+              type="submit"
+              className="btn btn--primary"
+            >
               Добавить планету
             </button>
           </form>
@@ -458,7 +629,7 @@ const [planetNameDraft, setPlanetNameDraft] = useState("")
                   id="random_planet_name"
                   name="planet[name]"
                   type="text"
-                  maxLength={50}
+                  maxLength={25}
                   placeholder="Пустое поле — случайное имя"
                 />
               </div>
@@ -490,7 +661,10 @@ const [planetNameDraft, setPlanetNameDraft] = useState("")
             aria-labelledby="confirm-modal-title"
             aria-describedby="confirm-modal-description"
           >
-            <div className="confirm-modal__icon" aria-hidden="true">
+            <div
+              className="confirm-modal__icon"
+              aria-hidden="true"
+            >
               !
             </div>
 

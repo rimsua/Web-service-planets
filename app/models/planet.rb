@@ -12,14 +12,14 @@ class Planet < ApplicationRecord
 
   validates :name,
             presence: true,
-            length: { in: 1..50 }
-  
+            length: { in: 1..25 }
+
   validates :name,
-          uniqueness: {
-            scope: :star_system_id,
-            case_sensitive: false,
-            message: "уже используется другой планетой в этой системе"
-          }
+            uniqueness: {
+              scope: :star_system_id,
+              case_sensitive: false,
+              message: "уже используется другой планетой в этой системе"
+            }
 
   validates :planet_type,
             inclusion: { in: PLANET_TYPES }

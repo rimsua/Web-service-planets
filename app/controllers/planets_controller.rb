@@ -40,12 +40,14 @@ class PlanetsController < ApplicationController
   end
 
   def update
-    @star_system = Current.user.star_systems.find(params[:star_system_id])
+    @star_system = Current.user.star_systems.find(
+      params[:star_system_id]
+    )
     @planet = @star_system.planets.find(params[:id])
 
-    if @planet.update(params.require(:planet).permit(:name))
+    if @planet.update(planet_params)
       redirect_to star_system_path(@star_system),
-                  notice: "Название планеты изменено."
+                  notice: "Параметры планеты изменены."
     else
       redirect_to star_system_path(@star_system),
                   alert: @planet.errors.full_messages.to_sentence
@@ -61,7 +63,7 @@ class PlanetsController < ApplicationController
     @planet.destroy
 
     redirect_to star_system_path(@star_system),
-                notice: "Планета удалена"
+                notice: "Планета удалена."
   end
 
   private
