@@ -20,6 +20,10 @@ function AppShell({ userNickname, children }) {
             Главная
           </a>
 
+          <a href="/star_systems" className="nav-link">
+            Звёздные системы
+          </a>
+
           <a href="/ui-kit" className="nav-link">
             UI-kit
           </a>

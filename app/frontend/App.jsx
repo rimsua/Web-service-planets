@@ -4,6 +4,7 @@ import HomePage from "./pages/HomePage"
 import UiKitPage from "./pages/UiKitPage"
 import SignUpPage from "./pages/SignUpPage"
 import StarSystemPage from "./pages/StarSystemPage"
+import StarSystemsPage from "./pages/StarSystemsPage"
 
 function App({
   page,
@@ -34,6 +35,19 @@ function App({
   switch (page) {
     case "ui-kit":
       content = <UiKitPage />
+      break
+
+    case "star-systems":
+      content = (
+        <StarSystemsPage
+          userNickname={userNickname}
+          starSystems={starSystems}
+          starSystemLimit={starSystemLimit}
+          starTypeLabels={starTypeLabels}
+          flashAlert={flashAlert}
+          flashNotice={flashNotice}
+        />
+      )
       break
 
     case "star-system":

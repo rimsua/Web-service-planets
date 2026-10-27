@@ -169,8 +169,6 @@ class PlanetsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :missing
     assert_equal "Other Earth", another_planet.reload.name
-
-    assert_equal "Other Earth", another_planet.reload.name
   end
 
   private

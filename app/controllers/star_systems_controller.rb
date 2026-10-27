@@ -1,4 +1,10 @@
 class StarSystemsController < ApplicationController
+  def index
+  @star_systems = Current.user.star_systems
+                         .includes(:planets)
+                         .order(created_at: :desc)
+  end
+  
   def show
     @star_system = Current.user.star_systems
                             .includes(:planets)
@@ -21,13 +27,13 @@ class StarSystemsController < ApplicationController
     @star_system = Current.user.star_systems.find(params[:id])
     @star_system.destroy
 
-    redirect_to root_path,
+    redirect_to star_systems_path,
                 notice: "Звёздная система удалена вместе со всеми её планетами."
   end
 
   def create
     unless Current.user.can_create_star_system?
-      redirect_to root_path,
+      redirect_to star_systems_path,
                   alert: "Нельзя создать больше 10 звёздных систем."
       return
     end
@@ -35,10 +41,10 @@ class StarSystemsController < ApplicationController
     @star_system = Current.user.star_systems.new(star_system_params)
 
     if @star_system.save
-      redirect_to root_path,
+      redirect_to star_systems_path,
                   notice: "Звёздная система успешно создана."
     else
-      redirect_to root_path,
+      redirect_to star_systems_path,
                   alert: @star_system.errors.full_messages.join(". ")
     end
   end

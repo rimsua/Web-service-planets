@@ -1,8 +1,8 @@
 Rails.application.routes.draw do
   resource :session, only: [ :new, :create, :destroy ]
   resource :sign_up, only: [ :show, :create ]
-  resources :star_systems, only: [:create, :show, :update, :destroy] do
-    resources :planets, only: [:create, :update, :destroy] do
+  resources :star_systems, only: [ :index, :create, :show, :update, :destroy ] do
+    resources :planets, only: [ :create, :update, :destroy ] do
       collection do
         post :generate_random
       end

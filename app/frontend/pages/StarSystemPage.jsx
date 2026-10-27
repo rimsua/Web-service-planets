@@ -52,7 +52,7 @@ const [planetNameDraft, setPlanetNameDraft] = useState("")
   return (
     <div className="page system-detail-page">
       <div className="system-page-actions">
-        <a href="/" className="system-back-link">
+        <a href="/star_systems" className="system-back-link">
           ← Все звёздные системы
         </a>
 

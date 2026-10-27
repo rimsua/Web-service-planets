@@ -22,7 +22,7 @@ class StarSystemsControllerTest < ActionDispatch::IntegrationTest
            }
     end
 
-    assert_redirected_to root_path
+    assert_redirected_to star_systems_path
     assert StarSystem.exists?(name: "Alpha", user_id: @user.id)
   end
 
@@ -37,7 +37,7 @@ class StarSystemsControllerTest < ActionDispatch::IntegrationTest
            }
     end
 
-    assert_redirected_to root_path
+    assert_redirected_to star_systems_path
     assert_not_nil flash[:alert]
   end
 
@@ -62,7 +62,7 @@ class StarSystemsControllerTest < ActionDispatch::IntegrationTest
            }
     end
 
-    assert_redirected_to root_path
+    assert_redirected_to star_systems_path
     assert_not_nil flash[:alert]
   end
 
@@ -110,7 +110,7 @@ class StarSystemsControllerTest < ActionDispatch::IntegrationTest
       end
     end
 
-    assert_redirected_to root_path
+    assert_redirected_to star_systems_path
     assert_not StarSystem.exists?(system_id)
     assert_not Planet.exists?(planet_id)
   end
@@ -139,6 +139,21 @@ class StarSystemsControllerTest < ActionDispatch::IntegrationTest
              }
            }
     end
+
+    assert_redirected_to new_session_path
+  end
+
+  test "authenticated user can view star systems catalog" do
+    get star_systems_path
+
+    assert_response :success
+    assert_select "#react-root[data-page='star-systems']"
+  end
+
+  test "unauthenticated user is redirected from star systems catalog" do
+    sign_out
+
+    get star_systems_path
 
     assert_redirected_to new_session_path
   end
