@@ -33,7 +33,7 @@ function HomePage({ userNickname }) {
           <div className="hero__actions">
 
             <a href="/star_systems" className="btn btn--primary">
-              ✦ Создать звёздную систему
+              ✦ Мои звёздные системы
             </a>
 
             <a

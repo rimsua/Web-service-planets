@@ -7,4 +7,5 @@
   data-planets="<%= h(@star_system.planets.map { |planet| planet.as_json(only: [:id, :name, :planet_type, :temperature, :atmosphere, :water]).merge(habitable: planet.habitable?) }.to_json) %>"
   data-flash-alert="<%= h(flash[:alert].to_s) %>"
   data-flash-notice="<%= h(flash[:notice].to_s) %>"
+  data-star-systems="<%= h(Current.user.star_systems.includes(:planets).order(created_at: :desc).map { |system| system.as_json(only: [:id, :name, :star_type]).merge(planet_count: system.planets.size) }.to_json) %>"
 ></div>

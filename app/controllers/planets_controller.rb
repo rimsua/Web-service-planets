@@ -7,11 +7,28 @@ class PlanetsController < ApplicationController
     @planet = @star_system.planets.new(planet_params)
 
     if @planet.save
-      redirect_to star_system_path(@star_system),
-                  notice: "Планета успешно создана."
+      respond_to do |format|
+        format.html do
+          redirect_to star_system_path(@star_system),
+                      notice: "Планета успешно создана."
+        end
+
+        format.json do
+          render json: planet_json(@planet), status: :created
+        end
+      end
     else
-      redirect_to star_system_path(@star_system),
-                  alert: @planet.errors.full_messages.join(". ")
+      respond_to do |format|
+        format.html do
+          redirect_to star_system_path(@star_system),
+                      alert: @planet.errors.full_messages.join(". ")
+        end
+
+        format.json do
+          render json: { errors: @planet.errors.full_messages },
+                 status: :unprocessable_entity
+        end
+      end
     end
   end
 
@@ -31,11 +48,28 @@ class PlanetsController < ApplicationController
     )
 
     if @planet.save
-      redirect_to star_system_path(@star_system),
-                  notice: "Случайная планета успешно создана."
+      respond_to do |format|
+        format.html do
+          redirect_to star_system_path(@star_system),
+                      notice: "Случайная планета успешно создана."
+        end
+
+        format.json do
+          render json: planet_json(@planet), status: :created
+        end
+      end
     else
-      redirect_to star_system_path(@star_system),
-                  alert: @planet.errors.full_messages.join(". ")
+      respond_to do |format|
+        format.html do
+          redirect_to star_system_path(@star_system),
+                      alert: @planet.errors.full_messages.join(". ")
+        end
+
+        format.json do
+          render json: { errors: @planet.errors.full_messages },
+                 status: :unprocessable_entity
+        end
+      end
     end
   end
 
@@ -46,11 +80,28 @@ class PlanetsController < ApplicationController
     @planet = @star_system.planets.find(params[:id])
 
     if @planet.update(planet_params)
-      redirect_to star_system_path(@star_system),
-                  notice: "Параметры планеты изменены."
+      respond_to do |format|
+        format.html do
+          redirect_to star_system_path(@star_system),
+                      notice: "Параметры планеты изменены."
+        end
+
+        format.json do
+          render json: planet_json(@planet)
+        end
+      end
     else
-      redirect_to star_system_path(@star_system),
-                  alert: @planet.errors.full_messages.to_sentence
+      respond_to do |format|
+        format.html do
+          redirect_to star_system_path(@star_system),
+                      alert: @planet.errors.full_messages.to_sentence
+        end
+
+        format.json do
+          render json: { errors: @planet.errors.full_messages },
+                 status: :unprocessable_entity
+        end
+      end
     end
   end
 
@@ -58,12 +109,21 @@ class PlanetsController < ApplicationController
     @star_system = Current.user.star_systems.find(
       params[:star_system_id]
     )
-
     @planet = @star_system.planets.find(params[:id])
+    planet_id = @planet.id
+
     @planet.destroy
 
-    redirect_to star_system_path(@star_system),
-                notice: "Планета удалена."
+    respond_to do |format|
+      format.html do
+        redirect_to star_system_path(@star_system),
+                    notice: "Планета удалена."
+      end
+
+      format.json do
+        render json: { id: planet_id }
+      end
+    end
   end
 
   private
@@ -76,5 +136,18 @@ class PlanetsController < ApplicationController
       :atmosphere,
       :water
     )
+  end
+
+  def planet_json(planet)
+    planet.as_json(
+      only: [
+        :id,
+        :name,
+        :planet_type,
+        :temperature,
+        :atmosphere,
+        :water
+      ]
+    ).merge(habitable: planet.habitable?)
   end
 end

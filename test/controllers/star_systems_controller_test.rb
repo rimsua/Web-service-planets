@@ -26,6 +26,25 @@ class StarSystemsControllerTest < ActionDispatch::IntegrationTest
     assert StarSystem.exists?(name: "Alpha", user_id: @user.id)
   end
 
+  test "creates a star system through JSON" do
+    post star_systems_path,
+        params: {
+          star_system: {
+            name: "Alpha",
+            star_type: "K"
+          }
+        },
+        as: :json
+
+    assert_response :created
+
+    data = JSON.parse(response.body)
+
+    assert_equal "Alpha", data["name"]
+    assert_equal "K", data["star_type"]
+    assert_equal 0, data["planet_count"]
+  end
+
   test "does not create a system with a duplicate name" do
     assert_no_difference("StarSystem.count") do
       post star_systems_path,

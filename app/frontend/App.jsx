@@ -1,3 +1,4 @@
+import { useState } from "react"
 
 import AppShell from "./components/AppShell"
 import HomePage from "./pages/HomePage"
@@ -20,7 +21,22 @@ function App({
   flashAlert = "",
   flashNotice = ""
 }) {
-  if (page === "sign-up") {
+  const [activePage, setActivePage] = useState(page)
+  const [currentStarSystems, setCurrentStarSystems] =
+    useState(starSystems)
+
+  const handleSystemDeleted = (deletedId) => {
+    setCurrentStarSystems((current) =>
+      current.filter((system) => system.id !== deletedId)
+    )
+
+    setActivePage("star-systems")
+
+    // Меняем адрес без полной перезагрузки документа.
+    window.history.replaceState({}, "", "/star_systems")
+  }
+
+  if (activePage === "sign-up") {
     return (
       <SignUpPage
         errors={errors}
@@ -32,7 +48,7 @@ function App({
 
   let content
 
-  switch (page) {
+  switch (activePage) {
     case "ui-kit":
       content = <UiKitPage />
       break
@@ -41,7 +57,7 @@ function App({
       content = (
         <StarSystemsPage
           userNickname={userNickname}
-          starSystems={starSystems}
+          starSystems={currentStarSystems}
           starSystemLimit={starSystemLimit}
           starTypeLabels={starTypeLabels}
           flashAlert={flashAlert}
@@ -58,6 +74,7 @@ function App({
           planets={planets}
           flashAlert={flashAlert}
           flashNotice={flashNotice}
+          onSystemDeleted={handleSystemDeleted}
         />
       )
       break
@@ -67,7 +84,7 @@ function App({
       content = (
         <HomePage
           userNickname={userNickname}
-          starSystems={starSystems}
+          starSystems={currentStarSystems}
           starSystemLimit={starSystemLimit}
           starTypeLabels={starTypeLabels}
           flashAlert={flashAlert}

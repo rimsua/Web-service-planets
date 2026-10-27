@@ -1,3 +1,4 @@
+import { useState } from "react"
 import Badge from "../components/ui/Badge"
 
 function StarSystemsPage({
@@ -10,6 +11,68 @@ function StarSystemsPage({
 }) {
   const csrfToken =
     document.querySelector('meta[name="csrf-token"]')?.content || ""
+
+  const [visibleSystems, setVisibleSystems] = useState(starSystems)
+  const [localFlashAlert, setLocalFlashAlert] = useState(flashAlert)
+  const [localFlashNotice, setLocalFlashNotice] = useState(flashNotice)
+  const [isCreating, setIsCreating] = useState(false)
+
+  const handleCreateSystem = async (event) => {
+    event.preventDefault()
+
+    const form = event.currentTarget
+    const formData = new FormData(form)
+
+    const payload = {
+      star_system: {
+        name: formData.get("star_system[name]"),
+        star_type: formData.get("star_system[star_type]")
+      }
+    }
+
+    setIsCreating(true)
+    setLocalFlashAlert("")
+    setLocalFlashNotice("")
+
+    try {
+      const response = await fetch(form.action, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken
+        },
+        body: JSON.stringify(payload)
+      })
+
+      let data = {}
+
+      try {
+        data = await response.json()
+      } catch {
+        data = {}
+      }
+
+      if (!response.ok) {
+        const message = Array.isArray(data.errors)
+          ? data.errors.join(". ")
+          : "Не удалось создать звёздную систему."
+
+        setLocalFlashAlert(message)
+        return
+      }
+
+      setVisibleSystems((current) => [data, ...current])
+      setLocalFlashNotice("Звёздная система успешно создана.")
+      form.reset()
+    } catch {
+      setLocalFlashAlert(
+        "Не удалось связаться с сервером. Попробуй ещё раз."
+      )
+    } finally {
+      setIsCreating(false)
+    }
+  }
 
   return (
     <div className="page">
@@ -24,19 +87,19 @@ function StarSystemsPage({
           </div>
 
           <Badge>
-            {starSystems.length} / {starSystemLimit}
+            {visibleSystems.length} / {starSystemLimit}
           </Badge>
         </div>
 
-        {flashAlert && (
+        {localFlashAlert && (
           <div className="auth-errors" role="alert">
-            <p>{flashAlert}</p>
+            <p>{localFlashAlert}</p>
           </div>
         )}
 
-        {flashNotice && (
+        {localFlashNotice && (
           <div className="system-notice" role="status">
-            {flashNotice}
+            {localFlashNotice}
           </div>
         )}
 
@@ -45,7 +108,7 @@ function StarSystemsPage({
             <p className="eyebrow">NEW SYSTEM</p>
             <h2>Создать звёздную систему</h2>
 
-            {starSystems.length >= starSystemLimit ? (
+            {visibleSystems.length >= starSystemLimit ? (
               <p className="text-muted">
                 Достигнут лимит в {starSystemLimit} систем.
               </p>
@@ -54,6 +117,7 @@ function StarSystemsPage({
                 action="/star_systems"
                 method="post"
                 className="system-create-form"
+                onSubmit={handleCreateSystem}
               >
                 <input
                   type="hidden"
@@ -94,15 +158,19 @@ function StarSystemsPage({
                   </select>
                 </div>
 
-                <button type="submit" className="btn btn--primary">
-                  Создать систему
+                <button
+                  type="submit"
+                  className="btn btn--primary"
+                  disabled={isCreating}
+                >
+                  {isCreating ? "Создание…" : "Создать систему"}
                 </button>
               </form>
             )}
           </div>
 
           <div className="system-list">
-            {starSystems.length === 0 ? (
+            {visibleSystems.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-state__icon">✦</div>
                 <h3>Здесь пока пусто</h3>
@@ -112,7 +180,7 @@ function StarSystemsPage({
               </div>
             ) : (
               <div className="system-grid">
-                {starSystems.map((system) => (
+                {visibleSystems.map((system) => (
                   <a
                     href={`/star_systems/${system.id}`}
                     className="system-card-link"

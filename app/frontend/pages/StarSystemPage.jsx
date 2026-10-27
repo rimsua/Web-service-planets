@@ -5,10 +5,15 @@ function StarSystemPage({
   starTypeLabels = {},
   planets = [],
   flashAlert = "",
-  flashNotice = ""
+  flashNotice = "",
+  onSystemDeleted = () => {}
 }) {
   const csrfToken =
     document.querySelector('meta[name="csrf-token"]')?.content || ""
+
+  const [visiblePlanets, setVisiblePlanets] = useState(planets)
+  const [localFlashAlert, setLocalFlashAlert] = useState(flashAlert)
+  const [localFlashNotice, setLocalFlashNotice] = useState(flashNotice)
 
   const [pendingDeletion, setPendingDeletion] = useState(null)
 
@@ -16,6 +21,15 @@ function StarSystemPage({
   const [systemNameDraft, setSystemNameDraft] = useState(
     starSystem?.name || ""
   )
+
+  const [visibleStarSystemName, setVisibleStarSystemName] =
+    useState(starSystem?.name || "")
+
+  const [isSavingSystemName, setIsSavingSystemName] =
+    useState(false)
+
+  const [isDeletingSystem, setIsDeletingSystem] =
+    useState(false)
 
   const [editingPlanetId, setEditingPlanetId] = useState(null)
 
@@ -27,6 +41,10 @@ function StarSystemPage({
     water: false
   })
 
+  const [isAddPlanetOpen, setIsAddPlanetOpen] = useState(false)
+  const [createMode, setCreateMode] = useState("manual")
+  const [isSavingPlanet, setIsSavingPlanet] = useState(false)
+
   const startEditingPlanet = (planet) => {
     setPlanetDraft({
       name: planet.name,
@@ -37,6 +55,8 @@ function StarSystemPage({
     })
 
     setEditingPlanetId(planet.id)
+    setLocalFlashAlert("")
+    setLocalFlashNotice("")
   }
 
   const updatePlanetDraft = (field, value) => {
@@ -44,6 +64,315 @@ function StarSystemPage({
       ...current,
       [field]: value
     }))
+  }
+
+  const readResponse = async (response) => {
+    try {
+      return await response.json()
+    } catch {
+      return {}
+    }
+  }
+
+  const getErrorMessage = (data, fallback) => {
+    if (Array.isArray(data.errors) && data.errors.length > 0) {
+      return data.errors.join(". ")
+    }
+
+    return fallback
+  }
+
+  const requestHeaders = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    "X-CSRF-Token": csrfToken
+  }
+
+  // Переименование звёздной системы без перезагрузки страницы.
+  const handleSystemNameSubmit = async (event) => {
+    event.preventDefault()
+
+    const form = event.currentTarget
+    const formData = new FormData(form)
+
+    const name = String(
+      formData.get("star_system[name]") || ""
+    ).trim()
+
+    setIsSavingSystemName(true)
+    setLocalFlashAlert("")
+    setLocalFlashNotice("")
+
+    try {
+      const response = await fetch(form.action, {
+        method: "PATCH",
+        headers: requestHeaders,
+        body: JSON.stringify({
+          star_system: { name }
+        })
+      })
+
+      const data = await readResponse(response)
+
+      if (!response.ok) {
+        setLocalFlashAlert(
+          getErrorMessage(
+            data,
+            "Не удалось изменить название звёздной системы."
+          )
+        )
+        return
+      }
+
+      const savedName = data.name || name
+
+      setVisibleStarSystemName(savedName)
+      setSystemNameDraft(savedName)
+      setIsEditingSystemName(false)
+
+      setLocalFlashNotice(
+        "Название звёздной системы изменено."
+      )
+    } catch {
+      setLocalFlashAlert(
+        "Не удалось связаться с сервером. Попробуй ещё раз."
+      )
+    } finally {
+      setIsSavingSystemName(false)
+    }
+  }
+
+  // Удаление звёздной системы без перезагрузки страницы.
+  const handleSystemDelete = async (systemId) => {
+    setIsDeletingSystem(true)
+    setLocalFlashAlert("")
+    setLocalFlashNotice("")
+
+    try {
+      const response = await fetch(
+        `/star_systems/${systemId}`,
+        {
+          method: "DELETE",
+          headers: requestHeaders
+        }
+      )
+
+      const data = await readResponse(response)
+
+      if (!response.ok) {
+        setLocalFlashAlert(
+          getErrorMessage(
+            data,
+            "Не удалось удалить звёздную систему."
+          )
+        )
+        return
+      }
+
+      // Сообщаем компоненту App, что систему удалили.
+      // App должен показать каталог звёздных систем.
+      onSystemDeleted(data.id ?? systemId)
+    } catch {
+      setLocalFlashAlert(
+        "Не удалось связаться с сервером. Попробуй ещё раз."
+      )
+    } finally {
+      setIsDeletingSystem(false)
+    }
+  }
+
+  // Создание планеты вручную без перезагрузки страницы.
+  const handleManualPlanetSubmit = async (event) => {
+    event.preventDefault()
+
+    const form = event.currentTarget
+    const formData = new FormData(form)
+
+    const payload = {
+      planet: {
+        name: formData.get("planet[name]"),
+        planet_type: formData.get("planet[planet_type]"),
+        temperature: Number(
+          formData.get("planet[temperature]")
+        ),
+        atmosphere: formData.get("planet[atmosphere]"),
+        water: formData.get("planet[water]") === "true"
+      }
+    }
+
+    setIsSavingPlanet(true)
+    setLocalFlashAlert("")
+    setLocalFlashNotice("")
+
+    try {
+      const response = await fetch(form.action, {
+        method: "POST",
+        headers: requestHeaders,
+        body: JSON.stringify(payload)
+      })
+
+      const data = await readResponse(response)
+
+      if (!response.ok) {
+        setLocalFlashAlert(
+          getErrorMessage(data, "Не удалось создать планету.")
+        )
+        return
+      }
+
+      setVisiblePlanets((current) => [...current, data])
+      setLocalFlashNotice("Планета успешно создана.")
+      setIsAddPlanetOpen(false)
+      setCreateMode("manual")
+      form.reset()
+    } catch {
+      setLocalFlashAlert(
+        "Не удалось связаться с сервером. Попробуй ещё раз."
+      )
+    } finally {
+      setIsSavingPlanet(false)
+    }
+  }
+
+  // Создание случайной планеты без перезагрузки страницы.
+  const handleRandomPlanetSubmit = async (event) => {
+    event.preventDefault()
+
+    const form = event.currentTarget
+    const formData = new FormData(form)
+
+    const payload = {
+      planet: {
+        name: formData.get("planet[name]")
+      }
+    }
+
+    setIsSavingPlanet(true)
+    setLocalFlashAlert("")
+    setLocalFlashNotice("")
+
+    try {
+      const response = await fetch(form.action, {
+        method: "POST",
+        headers: requestHeaders,
+        body: JSON.stringify(payload)
+      })
+
+      const data = await readResponse(response)
+
+      if (!response.ok) {
+        setLocalFlashAlert(
+          getErrorMessage(
+            data,
+            "Не удалось сгенерировать планету."
+          )
+        )
+        return
+      }
+
+      setVisiblePlanets((current) => [...current, data])
+      setLocalFlashNotice("Случайная планета успешно создана.")
+      setIsAddPlanetOpen(false)
+      setCreateMode("manual")
+      form.reset()
+    } catch {
+      setLocalFlashAlert(
+        "Не удалось связаться с сервером. Попробуй ещё раз."
+      )
+    } finally {
+      setIsSavingPlanet(false)
+    }
+  }
+
+  // Изменение планеты без перезагрузки страницы.
+  const handlePlanetUpdate = async (event, planetId) => {
+    event.preventDefault()
+
+    const form = event.currentTarget
+    const formData = new FormData(form)
+
+    const payload = {
+      planet: {
+        name: formData.get("planet[name]"),
+        planet_type: formData.get("planet[planet_type]"),
+        temperature: Number(
+          formData.get("planet[temperature]")
+        ),
+        atmosphere: formData.get("planet[atmosphere]"),
+        water: formData.get("planet[water]") === "true"
+      }
+    }
+
+    setIsSavingPlanet(true)
+    setLocalFlashAlert("")
+    setLocalFlashNotice("")
+
+    try {
+      const response = await fetch(form.action, {
+        method: "PATCH",
+        headers: requestHeaders,
+        body: JSON.stringify(payload)
+      })
+
+      const data = await readResponse(response)
+
+      if (!response.ok) {
+        setLocalFlashAlert(
+          getErrorMessage(data, "Не удалось изменить планету.")
+        )
+        return
+      }
+
+      setVisiblePlanets((current) =>
+        current.map((planet) =>
+          planet.id === planetId ? data : planet
+        )
+      )
+
+      setEditingPlanetId(null)
+      setLocalFlashNotice("Параметры планеты изменены.")
+    } catch {
+      setLocalFlashAlert(
+        "Не удалось связаться с сервером. Попробуй ещё раз."
+      )
+    } finally {
+      setIsSavingPlanet(false)
+    }
+  }
+
+  // Удаление планеты без перезагрузки страницы.
+  const handlePlanetDelete = async (planetId) => {
+    setLocalFlashAlert("")
+    setLocalFlashNotice("")
+
+    try {
+      const response = await fetch(
+        `/star_systems/${starSystem.id}/planets/${planetId}`,
+        {
+          method: "DELETE",
+          headers: requestHeaders
+        }
+      )
+
+      const data = await readResponse(response)
+
+      if (!response.ok) {
+        setLocalFlashAlert(
+          getErrorMessage(data, "Не удалось удалить планету.")
+        )
+        return
+      }
+
+      setVisiblePlanets((current) =>
+        current.filter((planet) => planet.id !== planetId)
+      )
+
+      setLocalFlashNotice("Планета удалена.")
+    } catch {
+      setLocalFlashAlert(
+        "Не удалось связаться с сервером. Попробуй ещё раз."
+      )
+    }
   }
 
   if (!starSystem) {
@@ -63,7 +392,7 @@ function StarSystemPage({
   const starLabel =
     starTypeLabels[starType] || `Спектральный класс ${starType}`
 
-  const planetCount = planets.length
+  const planetCount = visiblePlanets.length
 
   const planetTypeLabels = {
     rocky: "Каменистая",
@@ -93,9 +422,9 @@ function StarSystemPage({
             event.preventDefault()
 
             setPendingDeletion({
-              form: event.currentTarget,
+              systemId: starSystem.id,
               title: "Удалить звёздную систему?",
-              message: `Система «${starSystem.name}» и все её планеты будут удалены. Это действие нельзя отменить.`
+              message: `Система «${visibleStarSystemName}» и все её планеты будут удалены. Это действие нельзя отменить.`
             })
           }}
         >
@@ -114,8 +443,9 @@ function StarSystemPage({
           <button
             type="submit"
             className="btn btn--danger btn--small"
+            disabled={isDeletingSystem}
           >
-            Удалить систему
+            {isDeletingSystem ? "Удаление…" : "Удалить систему"}
           </button>
         </form>
       </div>
@@ -139,6 +469,7 @@ function StarSystemPage({
                 className="inline-rename-form"
                 action={`/star_systems/${starSystem.id}`}
                 method="post"
+                onSubmit={handleSystemNameSubmit}
               >
                 <input
                   type="hidden"
@@ -146,7 +477,11 @@ function StarSystemPage({
                   value={csrfToken}
                 />
 
-                <input type="hidden" name="_method" value="patch" />
+                <input
+                  type="hidden"
+                  name="_method"
+                  value="patch"
+                />
 
                 <input
                   className="form__input"
@@ -165,15 +500,19 @@ function StarSystemPage({
                 <button
                   className="btn btn--primary btn--small"
                   type="submit"
+                  disabled={isSavingSystemName}
                 >
-                  Сохранить
+                  {isSavingSystemName
+                    ? "Сохранение…"
+                    : "Сохранить"}
                 </button>
 
                 <button
                   className="btn btn--secondary btn--small"
                   type="button"
+                  disabled={isSavingSystemName}
                   onClick={() => {
-                    setSystemNameDraft(starSystem.name)
+                    setSystemNameDraft(visibleStarSystemName)
                     setIsEditingSystemName(false)
                   }}
                 >
@@ -182,13 +521,13 @@ function StarSystemPage({
               </form>
             ) : (
               <>
-                <h1>{starSystem.name}</h1>
+                <h1>{visibleStarSystemName}</h1>
 
                 <button
                   className="btn btn--secondary btn--small"
                   type="button"
                   onClick={() => {
-                    setSystemNameDraft(starSystem.name)
+                    setSystemNameDraft(visibleStarSystemName)
                     setIsEditingSystemName(true)
                   }}
                   aria-label="Изменить название системы"
@@ -199,9 +538,7 @@ function StarSystemPage({
             )}
           </div>
 
-          <p className="system-detail-type">
-            {starLabel}
-          </p>
+          <p className="system-detail-type">{starLabel}</p>
         </div>
 
         <div className="system-detail-count">
@@ -216,18 +553,33 @@ function StarSystemPage({
                 ? "планеты"
                 : "планет"}
           </span>
+
+          <button
+            className="btn btn--primary btn--small planet-add-trigger"
+            type="button"
+            onClick={() => {
+              setCreateMode("manual")
+              setIsAddPlanetOpen(true)
+              setLocalFlashAlert("")
+              setLocalFlashNotice("")
+            }}
+            aria-label="Добавить планету"
+            title="Добавить планету"
+          >
+            +
+          </button>
         </div>
       </section>
 
-      {flashNotice && (
+      {localFlashNotice && (
         <div className="system-notice" role="status">
-          {flashNotice}
+          {localFlashNotice}
         </div>
       )}
 
-      {flashAlert && (
+      {localFlashAlert && (
         <div className="auth-errors" role="alert">
-          <p>{flashAlert}</p>
+          <p>{localFlashAlert}</p>
         </div>
       )}
 
@@ -246,14 +598,16 @@ function StarSystemPage({
         {planetCount === 0 ? (
           <div className="empty-state">
             <div className="empty-state__icon">✦</div>
+
             <h3>Здесь пока пусто</h3>
+
             <p>
-              Добавь первую планету, чтобы начать исследовать систему.
+              Нажми «+» рядом с названием системы, чтобы добавить первую планету.
             </p>
           </div>
         ) : (
           <div className="planet-grid">
-            {planets.map((planet) => (
+            {visiblePlanets.map((planet) => (
               <article
                 className="ui-card planet-card"
                 key={planet.id}
@@ -269,6 +623,9 @@ function StarSystemPage({
                     className="system-create-form planet-edit-form"
                     action={`/star_systems/${starSystem.id}/planets/${planet.id}`}
                     method="post"
+                    onSubmit={(event) =>
+                      handlePlanetUpdate(event, planet.id)
+                    }
                   >
                     <input
                       type="hidden"
@@ -397,13 +754,17 @@ function StarSystemPage({
                     <button
                       type="submit"
                       className="btn btn--primary"
+                      disabled={isSavingPlanet}
                     >
-                      Сохранить изменения
+                      {isSavingPlanet
+                        ? "Сохранение…"
+                        : "Сохранить изменения"}
                     </button>
 
                     <button
                       type="button"
                       className="btn btn--secondary"
+                      disabled={isSavingPlanet}
                       onClick={() => setEditingPlanetId(null)}
                     >
                       Отмена
@@ -471,7 +832,7 @@ function StarSystemPage({
                     event.preventDefault()
 
                     setPendingDeletion({
-                      form: event.currentTarget,
+                      planetId: planet.id,
                       title: "Удалить планету?",
                       message: `Планета «${planet.name}» будет удалена. Это действие нельзя отменить.`
                     })
@@ -502,148 +863,225 @@ function StarSystemPage({
         )}
       </section>
 
-      <section className="section" id="add-planet">
-        <div className="section__header">
-          <div>
-            <p className="eyebrow">CREATE PLANET</p>
-            <h2>Добавить планету</h2>
-          </div>
-        </div>
-
-        <div className="system-create-panel">
-          <form
-            action={`/star_systems/${starSystem.id}/planets`}
-            method="post"
-            className="system-create-form"
+      {isAddPlanetOpen && (
+        <div
+          className="planet-modal-backdrop"
+          onMouseDown={(event) => {
+            if (
+              event.target === event.currentTarget &&
+              !isSavingPlanet
+            ) {
+              setIsAddPlanetOpen(false)
+            }
+          }}
+        >
+          <section
+            className="planet-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="planet-modal-title"
           >
-            <input
-              type="hidden"
-              name="authenticity_token"
-              value={csrfToken}
-            />
-
-            <div className="system-form__field">
-              <label htmlFor="planet_name">Название</label>
-
-              <input
-                id="planet_name"
-                name="planet[name]"
-                type="text"
-                maxLength={25}
-                required
-              />
-            </div>
-
-            <div className="system-form__field">
-              <label htmlFor="planet_type">Тип планеты</label>
-
-              <select
-                id="planet_type"
-                name="planet[planet_type]"
-                defaultValue="rocky"
-                required
-              >
-                <option value="rocky">Каменистая</option>
-                <option value="gas">Газовая</option>
-                <option value="ice">Ледяная</option>
-                <option value="ocean">Океаническая</option>
-                <option value="lava">Лавовая</option>
-              </select>
-            </div>
-
-            <div className="system-form__field">
-              <label htmlFor="planet_temperature">
-                Температура (Кельвины)
-              </label>
-
-              <input
-                id="planet_temperature"
-                name="planet[temperature]"
-                type="number"
-                min={0}
-                step={1}
-                defaultValue={288}
-                required
-              />
-            </div>
-
-            <div className="system-form__field">
-              <label htmlFor="planet_atmosphere">Атмосфера</label>
-
-              <select
-                id="planet_atmosphere"
-                name="planet[atmosphere]"
-                defaultValue="dense"
-                required
-              >
-                <option value="none">Нет</option>
-                <option value="thin">Разреженная</option>
-                <option value="dense">Плотная</option>
-              </select>
-            </div>
-
-            <div className="system-form__field">
-              <label htmlFor="planet_water">Наличие воды</label>
-
-              <select
-                id="planet_water"
-                name="planet[water]"
-                defaultValue="false"
-                required
-              >
-                <option value="false">Нет</option>
-                <option value="true">Есть</option>
-              </select>
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn--primary"
-            >
-              Добавить планету
-            </button>
-          </form>
-
-          <div className="planet-random-actions">
-            <p className="planet-random-actions__description">
-              Не хочешь задавать параметры вручную? Создай планету случайным образом.
-            </p>
-
-            <form
-              action={`/star_systems/${starSystem.id}/planets/generate_random`}
-              method="post"
-              className="planet-random-form"
-            >
-              <input
-                type="hidden"
-                name="authenticity_token"
-                value={csrfToken}
-              />
-
-              <div className="system-form__field">
-                <label htmlFor="random_planet_name">
-                  Название планеты (необязательно)
-                </label>
-
-                <input
-                  id="random_planet_name"
-                  name="planet[name]"
-                  type="text"
-                  maxLength={25}
-                  placeholder="Пустое поле — случайное имя"
-                />
+            <div className="planet-modal__header">
+              <div>
+                <p className="eyebrow">CREATE PLANET</p>
+                <h2 id="planet-modal-title">Добавить планету</h2>
               </div>
 
               <button
-                type="submit"
-                className="btn btn--secondary"
+                type="button"
+                className="btn btn--secondary btn--small"
+                aria-label="Закрыть окно"
+                disabled={isSavingPlanet}
+                onClick={() => setIsAddPlanetOpen(false)}
               >
-                ✦ Сгенерировать случайную планету
+                ✕
               </button>
-            </form>
-          </div>
+            </div>
+
+            <div className="planet-modal__tabs">
+              <button
+                type="button"
+                className={`btn ${
+                  createMode === "manual"
+                    ? "btn--primary"
+                    : "btn--secondary"
+                }`}
+                disabled={isSavingPlanet}
+                onClick={() => setCreateMode("manual")}
+              >
+                Вручную
+              </button>
+
+              <button
+                type="button"
+                className={`btn ${
+                  createMode === "random"
+                    ? "btn--primary"
+                    : "btn--secondary"
+                }`}
+                disabled={isSavingPlanet}
+                onClick={() => setCreateMode("random")}
+              >
+                Случайная генерация
+              </button>
+            </div>
+
+            {createMode === "manual" ? (
+              <form
+                action={`/star_systems/${starSystem.id}/planets`}
+                method="post"
+                className="system-create-form planet-create-form"
+                onSubmit={handleManualPlanetSubmit}
+              >
+                <input
+                  type="hidden"
+                  name="authenticity_token"
+                  value={csrfToken}
+                />
+
+                <div className="system-form__field">
+                  <label htmlFor="new_planet_name">Название</label>
+
+                  <input
+                    id="new_planet_name"
+                    className="form__input"
+                    name="planet[name]"
+                    type="text"
+                    maxLength={25}
+                    required
+                  />
+                </div>
+
+                <div className="system-form__field">
+                  <label htmlFor="new_planet_type">
+                    Тип планеты
+                  </label>
+
+                  <select
+                    id="new_planet_type"
+                    name="planet[planet_type]"
+                    defaultValue="rocky"
+                    required
+                  >
+                    <option value="rocky">Каменистая</option>
+                    <option value="gas">Газовая</option>
+                    <option value="ice">Ледяная</option>
+                    <option value="ocean">Океаническая</option>
+                    <option value="lava">Лавовая</option>
+                  </select>
+                </div>
+
+                <div className="system-form__field">
+                  <label htmlFor="new_planet_temperature">
+                    Температура (Кельвины)
+                  </label>
+
+                  <input
+                    id="new_planet_temperature"
+                    className="form__input"
+                    name="planet[temperature]"
+                    type="number"
+                    min={0}
+                    step={1}
+                    defaultValue={288}
+                    required
+                  />
+                </div>
+
+                <div className="system-form__field">
+                  <label htmlFor="new_planet_atmosphere">
+                    Атмосфера
+                  </label>
+
+                  <select
+                    id="new_planet_atmosphere"
+                    name="planet[atmosphere]"
+                    defaultValue="dense"
+                    required
+                  >
+                    <option value="none">Нет</option>
+                    <option value="thin">Разреженная</option>
+                    <option value="dense">Плотная</option>
+                  </select>
+                </div>
+
+                <div className="system-form__field">
+                  <label htmlFor="new_planet_water">
+                    Наличие воды
+                  </label>
+
+                  <select
+                    id="new_planet_water"
+                    name="planet[water]"
+                    defaultValue="false"
+                    required
+                  >
+                    <option value="false">Нет</option>
+                    <option value="true">Есть</option>
+                  </select>
+                </div>
+
+                <div className="planet-modal__actions">
+                  <button
+                    type="submit"
+                    className="btn btn--primary"
+                    disabled={isSavingPlanet}
+                  >
+                    {isSavingPlanet
+                      ? "Создание…"
+                      : "Создать планету"}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form
+                action={`/star_systems/${starSystem.id}/planets/generate_random`}
+                method="post"
+                className="system-create-form planet-create-form"
+                onSubmit={handleRandomPlanetSubmit}
+              >
+                <input
+                  type="hidden"
+                  name="authenticity_token"
+                  value={csrfToken}
+                />
+
+                <p className="text-muted">
+                  Тип, температура, атмосфера и наличие воды будут выбраны
+                  случайным образом.
+                </p>
+
+                <div className="system-form__field">
+                  <label htmlFor="random_planet_name">
+                    Название (необязательно)
+                  </label>
+
+                  <input
+                    id="random_planet_name"
+                    className="form__input"
+                    name="planet[name]"
+                    type="text"
+                    maxLength={25}
+                    placeholder="Пустое поле — случайное имя"
+                  />
+                </div>
+
+                <div className="planet-modal__actions">
+                  <button
+                    type="submit"
+                    className="btn btn--primary"
+                    disabled={isSavingPlanet}
+                  >
+                    {isSavingPlanet
+                      ? "Генерация…"
+                      : "✦ Сгенерировать планету"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </section>
         </div>
-      </section>
+      )}
 
       {pendingDeletion && (
         <div
@@ -661,10 +1099,7 @@ function StarSystemPage({
             aria-labelledby="confirm-modal-title"
             aria-describedby="confirm-modal-description"
           >
-            <div
-              className="confirm-modal__icon"
-              aria-hidden="true"
-            >
+            <div className="confirm-modal__icon" aria-hidden="true">
               !
             </div>
 
@@ -690,13 +1125,20 @@ function StarSystemPage({
               <button
                 type="button"
                 className="btn btn--danger"
+                disabled={isDeletingSystem}
                 onClick={() => {
-                  const form = pendingDeletion.form
+                  const deletion = pendingDeletion
+
                   setPendingDeletion(null)
-                  form.submit()
+
+                  if (deletion.planetId) {
+                    handlePlanetDelete(deletion.planetId)
+                  } else if (deletion.systemId) {
+                    handleSystemDelete(deletion.systemId)
+                  }
                 }}
               >
-                Удалить
+                {isDeletingSystem ? "Удаление…" : "Удалить"}
               </button>
             </div>
           </section>

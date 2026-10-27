@@ -34,6 +34,30 @@ class PlanetsControllerTest < ActionDispatch::IntegrationTest
     assert_equal true, planet.water
   end
 
+  test "creates a planet through JSON" do
+      post star_system_planets_path(@system),
+          params: {
+            planet: {
+              name: "Venus",
+              planet_type: "rocky",
+              temperature: 300,
+              atmosphere: "thin",
+              water: true
+            }
+          },
+          as: :json
+
+      assert_response :created
+
+      data = JSON.parse(response.body)
+
+      assert_equal "Venus", data["name"]
+      assert_equal "rocky", data["planet_type"]
+      assert_equal 300, data["temperature"]
+      assert_equal "thin", data["atmosphere"]
+      assert_equal true, data["water"]
+    end
+
   test "does not create a planet with a duplicate name" do
     @system.planets.create!(
       name: "Earth",
@@ -73,7 +97,7 @@ class PlanetsControllerTest < ActionDispatch::IntegrationTest
     assert_includes Planet::PLANET_TYPES, planet.planet_type
     assert_includes 50..1000, planet.temperature
     assert_includes Planet::ATMOSPHERES, planet.atmosphere
-    assert_includes [true, false], planet.water
+    assert_includes [ true, false ], planet.water
   end
 
   test "generates a random planet with a custom name" do
@@ -98,6 +122,33 @@ class PlanetsControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to star_system_path(@system)
     assert_equal "New Earth", planet.reload.name
+  end
+
+  test "updates planet properties through JSON" do
+    planet = create_test_planet("Mars")
+
+    patch star_system_planet_path(@system, planet),
+          params: {
+            planet: {
+              name: "Ocean",
+              planet_type: "ocean",
+              temperature: 300,
+              atmosphere: "thin",
+              water: true
+            }
+          },
+          as: :json
+
+    assert_response :success
+
+    data = JSON.parse(response.body)
+
+    assert_equal "Ocean", data["name"]
+    assert_equal "ocean", data["planet_type"]
+    assert_equal 300, data["temperature"]
+    assert_equal "thin", data["atmosphere"]
+    assert_equal true, data["water"]
+    assert_equal true, data["habitable"]
   end
 
   test "updates all planet properties" do
