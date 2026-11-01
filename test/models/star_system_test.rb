@@ -137,4 +137,26 @@ class StarSystemTest < ActiveSupport::TestCase
 
     assert_not Planet.exists?(planet_id)
   end
+
+  test "star systems are private by default" do
+    assert_equal false, @system.published?
+  end
+
+  test "published scope returns only published systems" do
+    public_system = @user.star_systems.create!(
+      name: "Public System",
+      star_type: "G",
+      published: true
+    )
+
+    private_system = @user.star_systems.create!(
+      name: "Private System",
+      star_type: "K"
+    )
+
+    published_systems = StarSystem.published
+
+    assert_includes published_systems, public_system
+    assert_not_includes published_systems, private_system
+  end
 end

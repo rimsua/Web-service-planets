@@ -4,7 +4,7 @@ class StarSystemsController < ApplicationController
                          .includes(:planets)
                          .order(created_at: :desc)
   end
-  
+
   def show
     @star_system = Current.user.star_systems
                             .includes(:planets)
@@ -25,7 +25,7 @@ class StarSystemsController < ApplicationController
 
         format.json do
           render json: @star_system.as_json(
-            only: [:id, :name, :star_type]
+            only: [ :id, :name, :star_type ]
           ), status: :ok
         end
       end
@@ -44,6 +44,14 @@ class StarSystemsController < ApplicationController
         end
       end
     end
+  end
+
+  def publish
+    update_publication(true)
+  end
+
+  def unpublish
+    update_publication(false)
   end
 
   def destroy
@@ -74,7 +82,7 @@ class StarSystemsController < ApplicationController
         end
 
         format.json do
-          render json: { errors: [message] },
+          render json: { errors: [ message ] },
                 status: :unprocessable_entity
         end
       end
@@ -93,7 +101,7 @@ class StarSystemsController < ApplicationController
 
         format.json do
           render json: @star_system.as_json(
-            only: [:id, :name, :star_type]
+            only: [ :id, :name, :star_type, :published ]
           ).merge(planet_count: 0),
           status: :created
         end
@@ -114,6 +122,40 @@ class StarSystemsController < ApplicationController
   end
 
   private
+
+  def update_publication(published)
+    @star_system = Current.user.star_systems.find(params[:id])
+
+    if @star_system.update(published: published)
+      message = published ? "Звёздная система опубликована." : "Публикация звёздной системы отменена."
+
+      respond_to do |format|
+        format.html do
+          redirect_to star_system_path(@star_system), notice: message
+        end
+
+        format.json do
+          render json: {
+            id: @star_system.id,
+            published: @star_system.published?
+          }, status: :ok
+        end
+      end
+    else
+      respond_to do |format|
+        format.html do
+          redirect_to star_system_path(@star_system),
+                      alert: @star_system.errors.full_messages.to_sentence
+        end
+
+        format.json do
+          render json: {
+            errors: @star_system.errors.full_messages
+          }, status: :unprocessable_entity
+        end
+      end
+    end
+  end
 
   def star_system_params
     params.require(:star_system).permit(:name, :star_type)

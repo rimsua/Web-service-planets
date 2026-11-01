@@ -6,6 +6,8 @@ import UiKitPage from "./pages/UiKitPage"
 import SignUpPage from "./pages/SignUpPage"
 import StarSystemPage from "./pages/StarSystemPage"
 import StarSystemsPage from "./pages/StarSystemsPage"
+import UniversePage from "./pages/UniversePage"
+import PublicStarSystemPage from "./pages/PublicStarSystemPage"
 
 function App({
   page,
@@ -75,6 +77,24 @@ function App({
           flashAlert={flashAlert}
           flashNotice={flashNotice}
           onSystemDeleted={handleSystemDeleted}
+        />
+      )
+      break
+
+    case "universe":
+      content = (
+        <UniversePage
+          starSystems={currentStarSystems}
+        />
+      )
+      break
+
+    case "public-star-system":
+      content = (
+        <PublicStarSystemPage
+          starSystem={starSystem}
+          starTypeLabels={starTypeLabels}
+          planets={planets}
         />
       )
       break

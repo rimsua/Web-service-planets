@@ -15,6 +15,8 @@ class StarSystem < ApplicationRecord
 
   belongs_to :user
   has_many :planets, dependent: :destroy
+  
+  scope :published, -> { where(published: true) }
 
   # Убираем пробелы в начале и конце названия.
   before_validation do

@@ -1,5 +1,6 @@
 import { useState } from "react"
 import Badge from "../components/ui/Badge"
+import PublicationToggle from "../components/PublicationToggle"
 
 function StarSystemsPage({
   userNickname,
@@ -187,33 +188,48 @@ function StarSystemsPage({
                     key={system.id}
                     aria-label={`Открыть звёздную систему ${system.name}`}
                   >
-                    <article className="ui-card system-card">
-                      <div
-                        className={`star-preview star-preview--${system.star_type.toLowerCase()}`}
-                        aria-hidden="true"
-                      >
-                        {system.star_type}
-                      </div>
+                    
+                  <article className="ui-card system-card">
+                    <div
+                      className={`star-preview star-preview--${system.star_type.toLowerCase()}`}
+                      aria-hidden="true"
+                    >
+                      {system.star_type}
+                    </div>
 
-                      <p className="eyebrow">
-                        SPECTRAL CLASS {system.star_type}
-                      </p>
+                    <p className="eyebrow">
+                      SPECTRAL CLASS {system.star_type}
+                    </p>
 
-                      <h3>{system.name}</h3>
+                    <h3>{system.name}</h3>
 
-                      <p>
-                        {starTypeLabels[system.star_type] ||
-                          `Спектральный класс ${system.star_type}`}
-                      </p>
+                    <p>
+                      {starTypeLabels[system.star_type] ||
+                        `Спектральный класс ${system.star_type}`}
+                    </p>
 
-                      <p className="system-card-planet-count">
-                        Планет: {system.planet_count ?? 0}
-                      </p>
+                    <p className="system-card-planet-count">
+                      Планет: {system.planet_count ?? 0}
+                    </p>
 
-                      <span className="system-card-link__hint">
-                        Открыть систему →
-                      </span>
-                    </article>
+                    <div className="system-card__publication">
+                      <PublicationToggle
+                        systemId={system.id}
+                        published={Boolean(system.published)}
+                        compact
+                        onPublishedChange={(nextPublished) => {
+                          setVisibleSystems((current) =>
+                            current.map((item) =>
+                              item.id === system.id
+                                ? { ...item, published: nextPublished }
+                                : item
+                            )
+                          )
+                        }}
+                      />
+                    </div>
+                  </article>
+
                   </a>
                 ))}
               </div>

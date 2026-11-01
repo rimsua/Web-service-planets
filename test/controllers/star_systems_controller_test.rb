@@ -177,6 +177,42 @@ class StarSystemsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path
   end
 
+  test "publishes own star system" do
+    patch publish_star_system_path(@system), as: :json
+
+    assert_response :success
+    assert_equal true, JSON.parse(response.body)["published"]
+    assert @system.reload.published?
+  end
+
+  test "unpublishes own star system" do
+    @system.update!(published: true)
+
+    patch unpublish_star_system_path(@system), as: :json
+
+    assert_response :success
+    assert_equal false, JSON.parse(response.body)["published"]
+    assert_not @system.reload.published?
+  end
+
+  test "cannot publish another user's star system" do
+    other_user = User.create!(
+      nickname: "second",
+      email_address: "second@example.com",
+      password: "secret123"
+    )
+
+    other_system = other_user.star_systems.create!(
+      name: "Other",
+      star_type: "G"
+    )
+
+    patch publish_star_system_path(other_system), as: :json
+
+    assert_response :not_found
+    assert_not other_system.reload.published?
+  end
+
   private
 
   def create_test_user

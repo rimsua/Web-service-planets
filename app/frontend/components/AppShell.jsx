@@ -24,6 +24,10 @@ function AppShell({ userNickname, children }) {
             Звёздные системы
           </a>
 
+          <a href="/universe" className="nav-link">
+            Общая вселенная
+          </a>
+
           <a href="/ui-kit" className="nav-link">
             UI-kit
           </a>

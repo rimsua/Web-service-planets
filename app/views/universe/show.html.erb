@@ -1,0 +1,28 @@
+<div
+  id="react-root"
+  data-page="public-star-system"
+  data-user-nickname="<%= Current.user.nickname %>"
+  data-star-system="<%= h(
+    @star_system.as_json(
+      only: [:id, :name, :star_type]
+    ).merge(
+      owner_nickname: @star_system.user.nickname,
+      planet_count: @star_system.planets.size
+    ).to_json
+  ) %>"
+  data-star-type-labels="<%= h(StarSystem::STAR_TYPE_LABELS.to_json) %>"
+  data-planets="<%= h(
+    @star_system.planets.map do |planet|
+      planet.as_json(
+        only: [
+          :id,
+          :name,
+          :planet_type,
+          :temperature,
+          :atmosphere,
+          :water
+        ]
+      ).merge(habitable: planet.habitable?)
+    end.to_json
+  ) %>"
+></div>

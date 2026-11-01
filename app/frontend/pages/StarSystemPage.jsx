@@ -1,4 +1,5 @@
 import { useState } from "react"
+import PublicationToggle from "../components/PublicationToggle"
 
 function StarSystemPage({
   starSystem,
@@ -12,6 +13,11 @@ function StarSystemPage({
     document.querySelector('meta[name="csrf-token"]')?.content || ""
 
   const [visiblePlanets, setVisiblePlanets] = useState(planets)
+
+  const [isPublished, setIsPublished] = useState(
+    Boolean(starSystem?.published)
+  )
+
   const [localFlashAlert, setLocalFlashAlert] = useState(flashAlert)
   const [localFlashNotice, setLocalFlashNotice] = useState(flashNotice)
 
@@ -522,6 +528,12 @@ function StarSystemPage({
             ) : (
               <>
                 <h1>{visibleStarSystemName}</h1>
+
+                <PublicationToggle
+                  systemId={starSystem.id}
+                  published={isPublished}
+                  onPublishedChange={setIsPublished}
+                />
 
                 <button
                   className="btn btn--secondary btn--small"
