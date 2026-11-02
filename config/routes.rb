@@ -15,6 +15,11 @@ Rails.application.routes.draw do
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
   get "universe", to: "universe#index", as: :universe
+
+  get "universe/3d-preview",
+    to: "universe#preview",
+    as: :universe_3d_preview
+
   get "universe/:id", to: "universe#show", as: :universe_star_system
   
   get "ui-kit", to: "ui_kit#index", as: :ui_kit

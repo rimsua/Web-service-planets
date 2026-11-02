@@ -8,6 +8,7 @@ import StarSystemPage from "./pages/StarSystemPage"
 import StarSystemsPage from "./pages/StarSystemsPage"
 import UniversePage from "./pages/UniversePage"
 import PublicStarSystemPage from "./pages/PublicStarSystemPage"
+import Universe3DPage from "./pages/Universe3DPage"
 
 function App({
   page,
@@ -109,6 +110,14 @@ function App({
           starTypeLabels={starTypeLabels}
           flashAlert={flashAlert}
           flashNotice={flashNotice}
+        />
+      )
+      break
+
+    case "universe-3d":
+      content = (
+        <Universe3DPage
+          starSystems={currentStarSystems}
         />
       )
       break

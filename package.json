@@ -7,7 +7,10 @@
     "vite-plugin-ruby": "^5.2.5"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.2",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "three": "^0.187.0"
   }
 }

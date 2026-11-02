@@ -1,0 +1,17 @@
+<%
+  public_systems = @star_systems.map do |system|
+    system.as_json(
+      only: [:id, :name, :star_type]
+    ).merge(
+      planet_count: system.planets.size,
+      owner_nickname: system.user.nickname
+    )
+  end
+%>
+
+<div
+  id="react-root"
+  data-page="universe-3d"
+  data-user-nickname="<%= Current.user.nickname %>"
+  data-star-systems="<%= h(public_systems.to_json) %>"
+></div>

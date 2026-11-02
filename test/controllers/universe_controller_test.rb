@@ -91,6 +91,40 @@ class UniverseControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "signed-in user can open the 3D preview" do
+    get universe_3d_preview_path
+
+    assert_response :success
+
+    assert_select "#react-root[data-page='universe-3d']"
+  end
+
+  test "3D preview contains published systems but not private systems" do
+    viewer = create_test_user
+    owner = create_test_user
+
+    sign_in_as(viewer)
+
+    owner.star_systems.create!(
+      name: "Public Galaxy",
+      star_type: "G",
+      published: true
+    )
+
+    owner.star_systems.create!(
+      name: "Private Galaxy",
+      star_type: "K",
+      published: false
+    )
+
+    get universe_3d_preview_path
+
+    assert_response :success
+
+    assert_includes response.body, "Public Galaxy"
+    refute_includes response.body, "Private Galaxy"
+  end
+
   private
 
   def create_test_user

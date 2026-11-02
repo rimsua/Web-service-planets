@@ -27,6 +27,13 @@ function UniversePage({ starSystems = [] }) {
           <span className="badge badge--muted">
             {starSystems.length} систем
           </span>
+
+          <a
+            href="/universe/3d-preview"
+            className="btn btn--secondary"
+          >
+            Посмотреть 3D-сцену
+          </a>
         </div>
 
         {starSystems.length === 0 ? (
@@ -43,38 +50,35 @@ function UniversePage({ starSystems = [] }) {
         ) : (
           <div className="universe-grid">
             {starSystems.map((system) => (
-              <article
-                className="ui-card universe-system-card"
+              <a
+                href={`/universe/${system.id}`}
+                className="universe-system-card-link"
                 key={system.id}
+                aria-label={`Открыть звёздную систему ${system.name}`}
               >
-                <div className="universe-star" aria-hidden="true">
-                  {system.star_type}
-                </div>
+                <article className="ui-card universe-system-card">
+                  <div className="universe-star" aria-hidden="true">
+                    {system.star_type}
+                  </div>
 
-                <div className="universe-system-card__content">
-                  <p className="eyebrow">
-                    SPECTRAL CLASS {system.star_type}
-                  </p>
+                  <div className="universe-system-card__content">
+                    <p className="eyebrow">
+                      SPECTRAL CLASS {system.star_type}
+                    </p>
 
-                  <h2>{system.name}</h2>
+                    <h2>{system.name}</h2>
 
-                  <p>
-                    Автор: {system.owner_nickname}
-                  </p>
+                    <p>
+                      Автор: {system.owner_nickname}
+                    </p>
 
-                  <span className="badge badge--muted">
-                    {system.planet_count}{" "}
-                    {getPlanetWord(system.planet_count)}
-                  </span>
-
-                  <a
-                    href={`/universe/${system.id}`}
-                    className="system-card-link__hint"
-                  >
-                    Открыть систему
-                  </a>
-                </div>
-              </article>
+                    <span className="badge badge--muted">
+                      {system.planet_count}{" "}
+                      {getPlanetWord(system.planet_count)}
+                    </span>
+                  </div>
+                </article>
+              </a>
             ))}
           </div>
         )}
