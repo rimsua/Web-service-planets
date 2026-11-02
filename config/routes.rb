@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  mount ActionCable.server => "/cable"
+
   resource :session, only: [ :new, :create, :destroy ]
   resource :sign_up, only: [ :show, :create ]
   resources :star_systems, only: [ :index, :create, :show, :update, :destroy ] do
@@ -13,25 +15,14 @@ Rails.application.routes.draw do
       end
     end
   end
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+
+  get "universe/3d-preview", to: redirect("/universe")
   get "universe", to: "universe#index", as: :universe
-
-  get "universe/3d-preview",
-    to: "universe#preview",
-    as: :universe_3d_preview
-
-  get "universe/:id", to: "universe#show", as: :universe_star_system
-  
+  get "universe/:id",
+      to: "universe#show",
+      as: :universe_star_system
   get "ui-kit", to: "ui_kit#index", as: :ui_kit
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
-
-  # Defines the root path route ("/")
-  # root "posts#index"
   root "home#index"
 end

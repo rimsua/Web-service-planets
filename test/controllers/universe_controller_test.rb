@@ -91,8 +91,8 @@ class UniverseControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
-  test "signed-in user can open the 3D preview" do
-    get universe_3d_preview_path
+  test "signed-in user can open the 3D universe page" do
+    get universe_path
 
     assert_response :success
 
@@ -117,7 +117,7 @@ class UniverseControllerTest < ActionDispatch::IntegrationTest
       published: false
     )
 
-    get universe_3d_preview_path
+    get universe_path
 
     assert_response :success
 

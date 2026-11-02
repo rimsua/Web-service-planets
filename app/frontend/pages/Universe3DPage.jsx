@@ -6,22 +6,16 @@ function Universe3DPage({ starSystems = [] }) {
       <section className="section">
         <div className="section__header">
           <div>
-            <p className="eyebrow">PUBLIC STAR SYSTEMS</p>
+            <p className="eyebrow">COMMUNITY UNIVERSE</p>
 
-            <h1>Карта общей вселенной</h1>
+            <h1>Общая вселенная</h1>
 
             <p className="universe-intro">
-              Каждая светящаяся звезда обозначает систему,
-              которой пользователь поделился с сообществом.
+              Исследуй звёздные системы, которыми поделились 
+              другие пользователи: каждая светящаяся звезда
+              на карте обозначает одну такую систему.
             </p>
           </div>
-
-          <a
-            href="/universe"
-            className="btn btn--secondary"
-          >
-            ← Общая вселенная
-          </a>
         </div>
 
         <div className="universe-3d-panel">

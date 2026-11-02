@@ -7,6 +7,7 @@
     "vite-plugin-ruby": "^5.2.5"
   },
   "dependencies": {
+    "@rails/actioncable": "^8.1.400",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
     "react": "^19.3.0",

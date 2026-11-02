@@ -1,3 +1,5 @@
+import SystemScene3D from "../components/SystemScene3D"
+
 function PublicStarSystemPage({
   starSystem = null,
   starTypeLabels = {},
@@ -102,70 +104,20 @@ function PublicStarSystemPage({
           </span>
         </div>
 
-        {planetCount === 0 ? (
-          <div className="empty-state">
-            <div className="empty-state__icon">✦</div>
+        {planetCount > 0 && (
+          <div className="system-3d-block">
+            <p className="eyebrow">3D VIEW</p>
 
-            <h3>В этой системе пока нет планет</h3>
+            <h3>Трёхмерная модель системы</h3>
 
-            <p>
-              Владелец системы ещё не добавил планеты.
+            <p className="text-muted">
+              Нажми на планету, чтобы посмотреть её характеристики
             </p>
-          </div>
-        ) : (
-          <div className="planet-grid">
-            {planets.map((planet) => (
-              <article
-                className="ui-card planet-card"
-                key={planet.id}
-              >
-                <div
-                  className={`planet-marker planet-marker--${planet.planet_type}`}
-                  aria-hidden="true"
-                >
-                  ✦
-                </div>
 
-                <h3>{planet.name}</h3>
-
-                <span className="badge badge--muted">
-                  {planetTypeLabels[planet.planet_type] ||
-                    planet.planet_type}
-                </span>
-
-                <span
-                  className={`badge ${
-                    planet.habitable
-                      ? "badge--success"
-                      : "badge--danger"
-                  } planet-habitability`}
-                >
-                  {planet.habitable
-                    ? "Потенциально пригодна по модели"
-                    : "Не проходит критерии модели"}
-                </span>
-
-                <dl className="planet-properties">
-                  <div>
-                    <dt>Температура</dt>
-                    <dd>{planet.temperature} K</dd>
-                  </div>
-
-                  <div>
-                    <dt>Атмосфера</dt>
-                    <dd>
-                      {atmosphereLabels[planet.atmosphere] ||
-                        planet.atmosphere}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>Вода</dt>
-                    <dd>{planet.water ? "Есть" : "Нет"}</dd>
-                  </div>
-                </dl>
-              </article>
-            ))}
+            <SystemScene3D
+              starType={starType}
+              planets={planets}
+            />
           </div>
         )}
       </section>

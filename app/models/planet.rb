@@ -5,6 +5,9 @@ class Planet < ApplicationRecord
   HABITABLE_TEMPERATURE = 253..313
 
   belongs_to :star_system
+  # Сообщение вселенной об изменениях планет
+  after_commit :broadcast_star_system_change,
+              on: [:create, :update, :destroy]
 
   before_validation do
     self.name = name.strip if name.is_a?(String)
@@ -52,5 +55,13 @@ class Planet < ApplicationRecord
     else
       :hot
     end
+  end
+
+  private
+
+  def broadcast_star_system_change
+    system = StarSystem.find_by(id: star_system_id)
+
+    UniverseBroadcaster.upsert(system) if system&.published?
   end
 end

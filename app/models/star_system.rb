@@ -15,20 +15,25 @@ class StarSystem < ApplicationRecord
 
   belongs_to :user
   has_many :planets, dependent: :destroy
+  # Отправление изменения публичной системы после сохранения
+  after_commit :broadcast_public_state, on: [:create, :update]
+
+  # Отправление события удаления после уничтожения системы
+  after_destroy_commit :broadcast_public_removal
   
   scope :published, -> { where(published: true) }
 
-  # Убираем пробелы в начале и конце названия.
+  # Убираем пробелы в начале и конце названия
   before_validation do
     self.name = name.strip if name.is_a?(String)
   end
 
-  # Проверяем наличие названия и его длину.
+  # Проверка наличия названия и его длины
   validates :name,
             presence: true,
             length: { in: 1..15 }
 
-  # Запрещаем одинаковые названия систем у одного пользователя.
+  # Запрет одинаковых названий систем у одного пользователя
   validates :name,
             uniqueness: {
               scope: :user_id,
@@ -36,11 +41,26 @@ class StarSystem < ApplicationRecord
               message: "уже используется другой звёздной системой"
             }
 
-  # Проверяем допустимость спектрального класса звезды.
+  # Проверка допустимости спектрального класса звезды
   validates :star_type,
             inclusion: { in: STAR_TYPES }
 
   def planet_count
     planets.count
+  end
+
+  private
+
+  def broadcast_public_state
+    if published?
+      UniverseBroadcaster.upsert(self)
+    elsif saved_change_to_published? &&
+          saved_change_to_published == [true, false]
+      UniverseBroadcaster.remove(id)
+    end
+  end
+
+  def broadcast_public_removal
+    UniverseBroadcaster.remove(id) if published?
   end
 end
